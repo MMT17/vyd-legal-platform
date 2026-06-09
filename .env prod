@@ -1,0 +1,20 @@
+APP_NAME="Plataforma Legal VyD"
+APP_ENV=production
+APP_KEY=base64:ve6D8o8RN/DuWqPRHUJ3NzojyL80S4Gclt09xky1r6k=
+APP_DEBUG=true
+APP_URL=https://legal.vydabogados.cl
+
+APP_LOCALE=es
+APP_FALLBACK_LOCALE=es
+
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_PORT=3306
+DB_DATABASE=vydaboga_legal_app
+DB_USERNAME=vydaboga_legal_user
+DB_PASSWORD=Mat20011$
+
+FILESYSTEM_DISK=public
+SESSION_DRIVER=database
+CACHE_STORE=database
+QUEUE_CONNECTION=database
