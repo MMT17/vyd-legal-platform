@@ -16,12 +16,48 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Model;
 
 class SectionsRelationManager extends RelationManager
 {
     protected static string $relationship = 'sections';
 
     protected static ?string $title = 'Secciones';
+
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
+    protected function canViewAny(): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
+    protected function canCreate(): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
+    protected function canEdit(Model $record): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
+    protected function canDelete(Model $record): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
+    protected function canDeleteAny(): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
+    protected function canView(Model $record): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
 
     public function form(Schema $schema): Schema
     {

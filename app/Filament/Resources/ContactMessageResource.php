@@ -6,6 +6,7 @@ use App\Filament\Resources\ContactMessageResource\Pages;
 use App\Models\Cms\ContactMessage;
 use BackedEnum;
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
@@ -52,12 +53,12 @@ class ContactMessageResource extends Resource
 
     public static function canDelete(Model $record): bool
     {
-        return false;
+        return auth()->user()?->hasRole('administrador') ?? false;
     }
 
     public static function canDeleteAny(): bool
     {
-        return false;
+        return auth()->user()?->hasRole('administrador') ?? false;
     }
 
     public static function canView(Model $record): bool
@@ -126,6 +127,8 @@ class ContactMessageResource extends Resource
                     ->icon(Heroicon::OutlinedCheckCircle)
                     ->action(fn (ContactMessage $record) => $record->update(['read_at' => now()]))
                     ->visible(fn (ContactMessage $record): bool => blank($record->read_at)),
+                DeleteAction::make()
+                    ->label('Eliminar'),
             ])
             ->toolbarActions([])
             ->defaultSort('created_at', 'desc')

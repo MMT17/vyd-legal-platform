@@ -65,6 +65,11 @@ class PracticeAreaResource extends Resource
         return auth()->user()?->hasRole('administrador') ?? false;
     }
 
+    public static function canView(Model $record): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

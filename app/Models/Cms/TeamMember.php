@@ -9,28 +9,36 @@ use Illuminate\Database\Eloquent\Model;
 #[Fillable([
     'name',
     'position',
+    'short_description',
+    'specialties',
+    'education',
+    'experience',
+    'activities',
     'bio',
     'photo_path',
     'email',
     'phone',
     'linkedin_url',
+    'is_partner',
     'sort_order',
     'is_active',
 ])]
 class TeamMember extends Model
 {
     /**
-     * Get the attributes that should be cast.
+     * The attributes that should be cast.
      *
-     * @return array<string, string>
+     * @var array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'sort_order' => 'integer',
-            'is_active' => 'boolean',
-        ];
-    }
+    protected $casts = [
+        'specialties' => 'array',
+        'education' => 'array',
+        'experience' => 'array',
+        'activities' => 'array',
+        'is_partner' => 'boolean',
+        'sort_order' => 'integer',
+        'is_active' => 'boolean',
+    ];
 
     public function scopeActive(Builder $query): Builder
     {

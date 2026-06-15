@@ -10,11 +10,16 @@ class TeamController extends Controller
 {
     public function index(): View
     {
+        $teamMembers = TeamMember::query()
+            ->active()
+            ->orderByDesc('is_partner')
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->get();
+
         return view('public.team', [
-            'teamMembers' => TeamMember::query()
-                ->active()
-                ->orderBy('sort_order')
-                ->get(),
+            'partners' => $teamMembers->where('is_partner', true)->values(),
+            'teamMembers' => $teamMembers->where('is_partner', false)->values(),
         ]);
     }
 }

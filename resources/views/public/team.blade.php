@@ -3,32 +3,65 @@
     'description' => 'Equipo profesional de VYD Abogados.',
 ])
 
+@php
+    $profileCard = function ($member, string $placeholder) {
+        return view('public.partials.team-card', [
+            'member' => $member,
+            'placeholder' => $placeholder,
+        ]);
+    };
+@endphp
+
 @section('content')
     <section class="content">
-        <h1>Equipo</h1>
-        <p class="content__lead">Profesionales activos administrados desde el CMS.</p>
+        <p class="eyebrow">Equipo</p>
+        <h1 class="page-title">Nuestro equipo</h1>
+        <p class="lead">Conoce a los profesionales que integran VYD Abogados.</p>
     </section>
 
-    <section class="section" style="padding-top: 0;">
-        <div class="grid">
-            @forelse ($teamMembers as $member)
-                <article class="card">
-                    <span class="card__meta">{{ $member->position ?: 'Equipo' }}</span>
-                    <h3>{{ $member->name }}</h3>
-                    @if ($member->email)
-                        <p>{{ $member->email }}</p>
-                    @endif
-                    @if ($member->phone)
-                        <p>{{ $member->phone }}</p>
-                    @endif
-                </article>
-            @empty
-                <article class="card">
-                    <span class="card__meta">Equipo</span>
-                    <h3>Sin integrantes activos</h3>
-                    <p>Agrega integrantes desde Filament para verlos en esta página.</p>
-                </article>
-            @endforelse
+    <section class="section section--tight">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Socios</p>
+                    <h2>Socios</h2>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                @forelse ($partners as $member)
+                    {{ $profileCard($member, 'Socio') }}
+                @empty
+                    <article class="card">
+                        <div class="placeholder-image">Socios</div>
+                        <h3>Socios</h3>
+                        <p>Pr&oacute;ximamente incorporaremos informaci&oacute;n de nuestros socios.</p>
+                    </article>
+                @endforelse
+            </div>
+        </div>
+    </section>
+
+    <section class="section section--tight">
+        <div class="container">
+            <div class="section-heading">
+                <div>
+                    <p class="eyebrow">Profesionales</p>
+                    <h2>Equipo</h2>
+                </div>
+            </div>
+
+            <div class="profile-grid">
+                @forelse ($teamMembers as $member)
+                    {{ $profileCard($member, 'Equipo') }}
+                @empty
+                    <article class="card">
+                        <div class="placeholder-image">Equipo</div>
+                        <h3>Equipo profesional</h3>
+                        <p>Pr&oacute;ximamente incorporaremos informaci&oacute;n de nuestro equipo profesional.</p>
+                    </article>
+                @endforelse
+            </div>
         </div>
     </section>
 @endsection

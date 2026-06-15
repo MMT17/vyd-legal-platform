@@ -4,9 +4,9 @@ namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
 use App\Models\Cms\ContactMessage;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\View\View;
 
 class ContactController extends Controller
 {
@@ -17,14 +17,15 @@ class ContactController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
-        ContactMessage::create($request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
             'subject' => ['nullable', 'string', 'max:255'],
             'message' => ['required', 'string'],
-        ]));
+        ]);
 
-        return back()->with('status', 'Mensaje enviado correctamente.');
+        ContactMessage::create($data);
+
+        return back()->with('success', 'Mensaje enviado correctamente.');
     }
 }

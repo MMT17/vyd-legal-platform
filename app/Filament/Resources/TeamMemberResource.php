@@ -11,6 +11,8 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\TagsInput;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -64,6 +66,11 @@ class TeamMemberResource extends Resource
         return auth()->user()?->hasRole('administrador') ?? false;
     }
 
+    public static function canView(Model $record): bool
+    {
+        return auth()->user()?->hasRole('administrador') ?? false;
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -73,8 +80,47 @@ class TeamMemberResource extends Resource
                     ->required()
                     ->maxLength(255),
                 TextInput::make('position')
-                    ->label('Cargo')
+                    ->label('Cargo / especialidad principal')
                     ->maxLength(255),
+                Textarea::make('short_description')
+                    ->label('Descripción corta')
+                    ->rows(3)
+                    ->columnSpanFull(),
+                RichEditor::make('bio')
+                    ->label('Biografía')
+                    ->columnSpanFull(),
+                TagsInput::make('specialties')
+                    ->label('Áreas de práctica')
+                    ->placeholder('Agregar área')
+                    ->suggestions([
+                        'Derecho Administrativo',
+                        'Derecho Corporativo',
+                        'Derecho Civil',
+                        'Derecho Penal',
+                        'Derecho Concursal',
+                        'Derecho Laboral',
+                        'Derecho de Familia',
+                        'Derecho del Trabajo',
+                        'Regulación Eléctrica',
+                        'Litigación',
+                        'Propiedad Intelectual',
+                        'Compras Públicas',
+                        'Juzgados de Policía Local',
+                        'Negociaciones',
+                    ])
+                    ->columnSpanFull(),
+                TagsInput::make('education')
+                    ->label('Educación')
+                    ->placeholder('Agregar antecedente académico')
+                    ->columnSpanFull(),
+                TagsInput::make('experience')
+                    ->label('Experiencia profesional')
+                    ->placeholder('Agregar experiencia')
+                    ->columnSpanFull(),
+                TagsInput::make('activities')
+                    ->label('Actividades académicas y profesionales')
+                    ->placeholder('Agregar actividad')
+                    ->columnSpanFull(),
                 FileUpload::make('photo_path')
                     ->label('Foto')
                     ->image()
@@ -82,20 +128,9 @@ class TeamMemberResource extends Resource
                     ->directory('cms/equipo')
                     ->downloadable()
                     ->openable(),
-                TextInput::make('email')
-                    ->email()
-                    ->maxLength(255),
-                TextInput::make('phone')
-                    ->label('Teléfono')
-                    ->tel()
-                    ->maxLength(255),
-                TextInput::make('linkedin_url')
-                    ->label('LinkedIn')
-                    ->url()
-                    ->maxLength(255),
-                RichEditor::make('bio')
-                    ->label('Biografía')
-                    ->columnSpanFull(),
+                Toggle::make('is_partner')
+                    ->label('Es socio')
+                    ->default(false),
                 TextInput::make('sort_order')
                     ->label('Orden')
                     ->numeric()
@@ -120,8 +155,10 @@ class TeamMemberResource extends Resource
                     ->label('Cargo')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('email')
-                    ->searchable(),
+                IconColumn::make('is_partner')
+                    ->label('Socio')
+                    ->boolean()
+                    ->sortable(),
                 IconColumn::make('is_active')
                     ->label('Activo')
                     ->boolean()

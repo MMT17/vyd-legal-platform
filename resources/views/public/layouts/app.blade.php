@@ -3,37 +3,38 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'VYD Abogados' }}</title>
-    @isset($description)
-        <meta name="description" content="{{ $description }}">
-    @endisset
+    <title>{{ $title ?? 'VYD Abogados | Estudio Jur&iacute;dico' }}</title>
+    <meta name="description" content="{{ $description ?? 'VYD Abogados | Estudio Jur&iacute;dico' }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         :root {
             color-scheme: light;
-            --bg: #f7f4ef;
-            --ink: #191714;
-            --muted: #6f6a61;
-            --brand: #8a5a26;
-            --brand-dark: #4d3420;
-            --line: #e2ddd4;
-            --surface: #fffdfa;
+            --primary: #0F2744;
+            --secondary: #1D3B63;
+            --accent: #B68C4A;
+            --bg: #F6F2EB;
+            --ink: #1E1E1E;
+            --muted: #68635b;
+            --line: #ded6c8;
+            --paper: #fffdf8;
+            --soft: #ebe2d4;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
             background: var(--bg);
             color: var(--ink);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-weight: 400;
             line-height: 1.6;
         }
 
-        a {
-            color: inherit;
-        }
+        a { color: inherit; }
+        img { max-width: 100%; }
 
         .site-shell {
             min-height: 100vh;
@@ -41,174 +42,445 @@
             flex-direction: column;
         }
 
-        .site-header {
-            border-bottom: 1px solid var(--line);
-            background: rgba(255, 253, 250, 0.92);
-            backdrop-filter: blur(16px);
-            position: sticky;
-            top: 0;
-            z-index: 20;
-        }
-
-        .site-header__inner,
-        .section {
+        .container {
             width: min(1120px, calc(100% - 32px));
             margin: 0 auto;
         }
 
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            border-bottom: 1px solid rgba(222, 214, 200, 0.9);
+            background: rgba(255, 253, 248, 0.94);
+            backdrop-filter: blur(14px);
+        }
+
         .site-header__inner {
-            min-height: 72px;
+            min-height: 76px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 24px;
-        }
-
-        .brand {
-            text-decoration: none;
-            font-weight: 800;
-            letter-spacing: 0;
-        }
-
-        .brand span {
-            display: block;
-            color: var(--muted);
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
+            gap: 28px;
         }
 
         .nav {
             display: flex;
             align-items: center;
-            gap: 18px;
+            gap: 20px;
             color: var(--muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .nav a,
+        .footer-nav a {
+            text-decoration: none;
+        }
+
+        .nav a:hover,
+        .footer-nav a:hover {
+            color: var(--primary);
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: fit-content;
+            min-height: 46px;
+            padding: 11px 20px;
+            border: 1px solid var(--accent);
+            border-radius: 6px;
+            background: var(--accent);
+            color: #fffdf8;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .button--secondary {
+            background: transparent;
+            color: var(--primary);
+        }
+
+        .button--light {
+            border-color: rgba(255, 253, 248, 0.76);
+            background: rgba(255, 253, 248, 0.08);
+            color: #fffdf8;
+        }
+
+        .hero {
+            padding: 92px 0 72px;
+            border-bottom: 1px solid var(--line);
+            background: linear-gradient(120deg, rgba(15, 39, 68, 0.94), rgba(29, 59, 99, 0.78)), var(--primary);
+            color: #fffdf8;
+        }
+
+        .home-hero {
+            padding: 30px 0 0;
+            background: var(--bg);
+        }
+
+        .home-hero .container { position: relative; }
+
+        .home-hero__image,
+        .home-hero__placeholder {
+            width: 100%;
+            min-height: 360px;
+            max-height: 560px;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 18px 46px rgba(15, 39, 68, 0.16);
+        }
+
+        .home-hero__placeholder {
+            display: grid;
+            place-items: center;
+            background:
+                radial-gradient(circle at 72% 22%, rgba(182, 140, 74, 0.38), transparent 28%),
+                linear-gradient(120deg, rgba(15, 39, 68, 0.96), rgba(29, 59, 99, 0.82)),
+                var(--primary);
+            color: rgba(255, 253, 248, 0.2);
+            font-size: clamp(72px, 18vw, 210px);
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .home-hero__text {
+            position: absolute;
+            left: clamp(24px, 6vw, 70px);
+            bottom: clamp(24px, 6vw, 70px);
+            color: #fffdf8;
+        }
+
+        .home-hero__text h1,
+        .hero h1,
+        .page-title {
+            max-width: 880px;
+            margin: 0;
+            font-size: clamp(38px, 7vw, 76px);
+            font-weight: 700;
+            line-height: 0.98;
+            letter-spacing: 0;
+        }
+
+        .home-hero__text h1 {
+            font-size: clamp(42px, 8vw, 86px);
+            line-height: 0.95;
+        }
+
+        .home-hero__text p,
+        .hero p,
+        .lead {
+            max-width: 720px;
+            margin: 22px 0 0;
+            color: rgba(255, 253, 248, 0.84);
+            font-size: 19px;
+            font-weight: 400;
+        }
+
+        .home-hero__text p {
+            margin-top: 12px;
+            font-size: 20px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .home-hero__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 26px;
+        }
+
+        .section { padding: 56px 0; }
+        .section--tight { padding-top: 28px; }
+
+        .section-heading {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .section-heading h2,
+        .card h3,
+        .profile-card__body h3 {
+            margin: 0;
+            color: var(--ink);
+            font-weight: 700;
+            line-height: 1.12;
+        }
+
+        .section-heading h2 { font-size: 30px; }
+        .card h3 { margin: 16px 0 8px; font-size: 22px; }
+        .profile-card__body h3 { margin: 8px 0 10px; font-size: 25px; }
+
+        .eyebrow,
+        .card__meta {
+            margin: 0 0 10px;
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .grid,
+        .profile-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+        .profile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+
+        .card,
+        .profile-card {
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--paper);
+            box-shadow: 0 16px 38px rgba(15, 39, 68, 0.08);
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            padding: 22px;
+            text-decoration: none;
+        }
+
+        .profile-card {
+            display: grid;
+            grid-template-columns: 190px minmax(0, 1fr);
+            gap: 22px;
+            min-height: 280px;
+            padding: 22px;
+        }
+
+        .card p,
+        .muted,
+        .profile-card__description {
+            color: var(--muted);
+        }
+
+        .card__image,
+        .placeholder-image,
+        .content-image,
+        .profile-card__photo {
+            width: 100%;
+            border-radius: 7px;
+            background: linear-gradient(135deg, rgba(182, 140, 74, 0.2), rgba(15, 39, 68, 0.1)), var(--soft);
+        }
+
+        .card__image,
+        .placeholder-image {
+            aspect-ratio: 16 / 10;
+            object-fit: cover;
+        }
+
+        .placeholder-image,
+        .profile-card__photo--placeholder {
+            display: grid;
+            place-items: center;
+            color: var(--primary);
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .card__link {
+            margin-top: auto;
+            color: var(--primary);
             font-size: 14px;
             font-weight: 700;
         }
 
-        .nav a {
-            text-decoration: none;
+        .profile-card__photo {
+            height: 100%;
+            min-height: 236px;
+            object-fit: cover;
         }
 
-        .hero {
-            padding: 82px 0 56px;
-            background:
-                linear-gradient(120deg, rgba(77, 52, 32, 0.92), rgba(25, 23, 20, 0.76)),
-                url("https://images.unsplash.com/photo-1589829545856-d10d557cf95f?auto=format&fit=crop&w=1800&q=80") center/cover;
-            color: #fffdfa;
-        }
+        .profile-card__description { margin: 0 0 16px; }
 
-        .hero h1,
-        .content h1 {
-            max-width: 820px;
-            margin: 0;
-            font-size: clamp(38px, 7vw, 76px);
-            line-height: 0.95;
-            letter-spacing: 0;
-        }
+        .profile-section { margin-top: 18px; }
 
-        .hero p,
-        .content__lead {
-            max-width: 680px;
-            margin: 22px 0 0;
-            color: rgba(255, 253, 250, 0.82);
-            font-size: 18px;
-        }
-
-        .section {
-            padding: 48px 0;
-        }
-
-        .section__heading {
-            display: flex;
-            justify-content: space-between;
-            align-items: end;
-            gap: 24px;
-            margin-bottom: 20px;
-        }
-
-        .section__heading h2 {
-            margin: 0;
-            font-size: 28px;
-            line-height: 1.1;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 18px;
-        }
-
-        .card {
-            min-height: 180px;
-            padding: 24px;
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            background: var(--surface);
-            text-decoration: none;
-            box-shadow: 0 14px 36px rgba(44, 35, 24, 0.08);
-        }
-
-        .card__meta {
-            color: var(--brand);
-            font-size: 13px;
-            font-weight: 800;
+        .profile-section h4 {
+            margin: 0 0 8px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 1.2;
+            letter-spacing: 0.04em;
             text-transform: uppercase;
         }
 
-        .card h3 {
-            margin: 10px 0;
-            font-size: 22px;
-            line-height: 1.15;
+        .profile-section ul {
+            display: grid;
+            gap: 6px;
+            margin: 0;
+            padding-left: 18px;
+            color: var(--muted);
+            font-size: 14px;
         }
 
-        .card p,
-        .muted {
-            color: var(--muted);
+        .specialty-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .specialty-list li {
+            padding: 6px 10px;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: #f8f2e8;
+            color: var(--primary);
+            font-size: 13px;
+            font-weight: 500;
         }
 
         .content {
-            width: min(860px, calc(100% - 32px));
+            width: min(900px, calc(100% - 32px));
             margin: 0 auto;
-            padding: 56px 0;
+            padding: 62px 0;
         }
 
-        .content h1 {
+        .content .lead { color: var(--muted); }
+        .content-body { margin-top: 32px; font-size: 18px; }
+
+        .content-image {
+            display: block;
+            min-height: 260px;
+            max-height: 440px;
+            margin-bottom: 30px;
+            object-fit: cover;
+        }
+
+        .simple-form {
+            display: grid;
+            gap: 16px;
+            margin-top: 30px;
+        }
+
+        .simple-form input,
+        .simple-form textarea {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            background: var(--paper);
+            padding: 13px 15px;
             color: var(--ink);
+            font: inherit;
         }
 
-        .content__lead {
-            color: var(--muted);
-        }
-
-        .content__body {
-            margin-top: 34px;
-            font-size: 18px;
+        .notice {
+            padding: 13px 16px;
+            border: 1px solid #bbd7bc;
+            border-radius: 7px;
+            background: #eef8ef;
+            color: #285d31;
         }
 
         .site-footer {
             margin-top: auto;
             border-top: 1px solid var(--line);
-            padding: 28px 0;
+            padding: 42px 0 28px;
+            background: var(--paper);
             color: var(--muted);
-            background: var(--surface);
             font-size: 14px;
         }
 
-        @media (max-width: 760px) {
+        .site-footer__inner {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: 18px;
+        }
+
+        .footer-brand {
+            display: grid;
+            gap: 10px;
+            max-width: 460px;
+        }
+
+        .footer-brand p { margin: 4px 0 0; }
+
+        .footer-brand > span {
+            color: var(--accent);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .footer-contact {
+            color: var(--primary);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .footer-meta {
+            display: grid;
+            justify-items: end;
+            gap: 18px;
+            text-align: right;
+        }
+
+        .footer-nav {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            gap: 12px 18px;
+        }
+
+        .copyright {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        @media (max-width: 820px) {
+            .site-header__inner,
+            .site-footer__inner,
+            .profile-card {
+                grid-template-columns: 1fr;
+            }
+
             .site-header__inner {
                 align-items: flex-start;
-                flex-direction: column;
-                padding: 16px 0;
+                padding: 18px 0;
             }
 
-            .nav {
+            .nav,
+            .footer-nav {
                 flex-wrap: wrap;
+                justify-content: flex-start;
+                gap: 12px 16px;
             }
 
-            .grid {
+            .footer-meta {
+                justify-items: start;
+                text-align: left;
+            }
+
+            .grid,
+            .profile-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .home-hero__image,
+            .home-hero__placeholder {
+                min-height: 320px;
+            }
+
+            .home-hero__actions .button {
+                width: 100%;
             }
         }
     </style>
@@ -216,17 +488,14 @@
 <body>
     <div class="site-shell">
         <header class="site-header">
-            <div class="site-header__inner">
-                <a class="brand" href="{{ route('public.home') }}">
-                    VYD Abogados
-                    <span>Estudio jurídico</span>
-                </a>
+            <div class="container site-header__inner">
+                <x-logo :href="route('public.home')" size="sm" />
 
-                <nav class="nav" aria-label="Navegación principal">
+                <nav class="nav" aria-label="Navegaci&oacute;n principal">
                     <a href="{{ route('public.home') }}">Inicio</a>
                     <a href="{{ route('public.about') }}">Nosotros</a>
                     <a href="{{ route('public.team') }}">Equipo</a>
-                    <a href="{{ route('public.practice-areas.index') }}">Áreas</a>
+                    <a href="{{ route('public.practice-areas.index') }}">&Aacute;reas</a>
                     <a href="{{ route('public.contact') }}">Contacto</a>
                 </nav>
             </div>
@@ -237,8 +506,23 @@
         </main>
 
         <footer class="site-footer">
-            <div class="section" style="padding: 0;">
-                © {{ now()->year }} VYD Abogados. Sitio público en Laravel.
+            <div class="container site-footer__inner">
+                <div class="footer-brand">
+                    <x-logo :href="route('public.home')" size="sm" />
+                    <span>Estudio Jur&iacute;dico</span>
+                    <p>Asesor&iacute;a jur&iacute;dica clara, estrat&eacute;gica y cercana.</p>
+                    <a class="footer-contact" href="mailto:contacto@vydabogados.cl">contacto@vydabogados.cl</a>
+                </div>
+                <div class="footer-meta">
+                    <nav class="footer-nav" aria-label="Navegaci&oacute;n secundaria">
+                        <a href="{{ route('public.home') }}">Inicio</a>
+                        <a href="{{ route('public.about') }}">Nosotros</a>
+                        <a href="{{ route('public.team') }}">Equipo</a>
+                        <a href="{{ route('public.practice-areas.index') }}">&Aacute;reas</a>
+                        <a href="{{ route('public.contact') }}">Contacto</a>
+                    </nav>
+                    <p class="copyright">&copy; {{ now()->year }} VYD Abogados. Todos los derechos reservados.</p>
+                </div>
             </div>
         </footer>
     </div>

@@ -57,6 +57,25 @@ class RolesAndPermissionsSeeder extends Seeder
             'usuarios.eliminar',
             'reportes.ver',
             'auditoria.ver',
+
+            'cms.pages.view',
+            'cms.pages.create',
+            'cms.pages.update',
+            'cms.pages.delete',
+            'cms.sections.view',
+            'cms.sections.create',
+            'cms.sections.update',
+            'cms.sections.delete',
+            'cms.team.view',
+            'cms.team.create',
+            'cms.team.update',
+            'cms.team.delete',
+            'cms.practice_areas.view',
+            'cms.practice_areas.create',
+            'cms.practice_areas.update',
+            'cms.practice_areas.delete',
+            'cms.contact_messages.view',
+            'cms.contact_messages.delete',
         ];
 
         foreach ($permissions as $permission) {
