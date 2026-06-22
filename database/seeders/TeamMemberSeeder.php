@@ -14,7 +14,7 @@ class TeamMemberSeeder extends Seeder
     {
         foreach ($this->members() as $member) {
             TeamMember::updateOrCreate(
-                ['name' => $member['name']],
+                ['slug' => $member['slug']],
                 $member,
             );
         }
@@ -28,9 +28,14 @@ class TeamMemberSeeder extends Seeder
         return [
             [
                 'name' => 'Mauricio Domínguez',
+                'slug' => 'mauricio-dominguez',
                 'position' => 'Socio',
-                'short_description' => 'Profesional con experiencia en asuntos legales complejos, comprometido con soluciones efectivas y confidenciales.',
+                'short_description' => null,
                 'bio' => null,
+                'photo_path' => null,
+                'email' => null,
+                'phone' => null,
+                'linkedin_url' => null,
                 'specialties' => [
                     'Derecho Administrativo',
                     'Derecho Corporativo',
@@ -46,22 +51,22 @@ class TeamMemberSeeder extends Seeder
                     'Acreditación en Compras Públicas, Mercado Público.',
                     'Curso “Inducción General de la Administración del Estado”, Contraloría General de la República.',
                 ],
-                'experience' => [
-                    'Hospital Carlos Van Buren.',
-                    'Servicio de Salud Valparaíso-San Antonio.',
-                ],
-                'activities' => [
-                    'Relator en capacitación “Traspaso del personal de Educación Municipal a los Servicios Locales de Educación”.',
-                ],
+                'experience' => null,
+                'activities' => null,
                 'is_partner' => true,
                 'is_active' => true,
                 'sort_order' => 1,
             ],
             [
                 'name' => 'Cristián Vicencio',
+                'slug' => 'cristian-vicencio',
                 'position' => 'Socio',
-                'short_description' => 'Abogado con experiencia en derecho civil, derecho del trabajo, regulación eléctrica, litigación y asuntos administrativos.',
+                'short_description' => null,
                 'bio' => null,
+                'photo_path' => null,
+                'email' => null,
+                'phone' => null,
+                'linkedin_url' => null,
                 'specialties' => [
                     'Derecho Civil',
                     'Derecho del Trabajo',
@@ -76,13 +81,7 @@ class TeamMemberSeeder extends Seeder
                     'Diplomado, “Regulación Eléctrica”, Universidad de Chile.',
                     'Diplomado, “Compras Públicas”, Universidad de Viña del Mar.',
                 ],
-                'experience' => [
-                    'Estudio Jurídico, Navia & Torres y Cía.',
-                    'Estudio Jurídico, Vasseur Abogados.',
-                    '1º Juzgado Civil de Quilpué.',
-                    'Estudio Jurídico, Vicencio y Castro Abogados Limitada.',
-                    'Estudio Jurídico, Vicencio y Domínguez Abogados Limitada.',
-                ],
+                'experience' => null,
                 'activities' => null,
                 'is_partner' => true,
                 'is_active' => true,
@@ -90,9 +89,14 @@ class TeamMemberSeeder extends Seeder
             ],
             [
                 'name' => 'Esteban Carrasco',
+                'slug' => 'esteban-carrasco',
                 'position' => 'Abogado',
-                'short_description' => 'Abogado orientado a la litigación y asesoría en materias civiles, penales y concursales.',
+                'short_description' => null,
                 'bio' => null,
+                'photo_path' => null,
+                'email' => null,
+                'phone' => null,
+                'linkedin_url' => null,
                 'specialties' => [
                     'Derecho Civil',
                     'Derecho Penal',
@@ -102,10 +106,7 @@ class TeamMemberSeeder extends Seeder
                     'Abogado (2023)',
                     'Diplomado en Compliance y Derecho Penal Económico - Actualización Ley N° 21.595, Ley de Delitos Económicos y Medioambientales – Universidad Adolfo Ibáñez.',
                 ],
-                'experience' => [
-                    'Salazar e Hidalgo Abogados.',
-                    'Estudio Jurídico Lena y Cía.',
-                ],
+                'experience' => null,
                 'activities' => null,
                 'is_partner' => false,
                 'is_active' => true,
@@ -113,9 +114,14 @@ class TeamMemberSeeder extends Seeder
             ],
             [
                 'name' => 'Aldo Honorato Soto',
+                'slug' => 'aldo-honorato-soto',
                 'position' => 'Abogado',
-                'short_description' => 'Abogado con práctica en materias civiles, penales, laborales, familia, policía local y litigación.',
+                'short_description' => null,
                 'bio' => null,
+                'photo_path' => null,
+                'email' => null,
+                'phone' => null,
+                'linkedin_url' => null,
                 'specialties' => [
                     'Derecho Civil',
                     'Derecho Penal',
@@ -127,14 +133,44 @@ class TeamMemberSeeder extends Seeder
                 'education' => [
                     'Abogado (2021)',
                 ],
-                'experience' => [
-                    'Estudio Jurídico, Demaría Varas.',
-                    'Ejercicio libre de la profesión.',
-                ],
+                'experience' => null,
                 'activities' => null,
                 'is_partner' => false,
                 'is_active' => true,
                 'sort_order' => 4,
+            ],
+            [
+                'name' => 'Sebastián Rojas',
+                'slug' => 'sebastian-rojas',
+                'position' => 'Abogado',
+                'short_description' => null,
+                'bio' => null,
+                'photo_path' => null,
+                'email' => null,
+                'phone' => null,
+                'linkedin_url' => null,
+                'specialties' => [
+                    'Derecho Laboral',
+                    'Derecho Aduanero',
+                    'Derecho Regulación Eléctrica',
+                    'Derecho Civil',
+                    'Litigación',
+                ],
+                'education' => [
+                    'Abogado (2014)',
+                    'Diplomado, “Derecho Aduanero”, Universidad Andrés Bello.',
+                    'Diplomado, “Derecho Laboral de la Empresa”, Universidad de Los Andes.',
+                    'Magíster en “Derecho del Trabajo”, Universidad de Los Andes.',
+                    'Inglés jurídico, Universidad de Los Andes.',
+                    'Máster en Derecho y Gestión Aduanera, Universidad de Barcelona.',
+                    'Certified Shortsea Logistics, Escuela Europea.',
+                    'Diplomado, “Regulación del Sector Eléctrico”, Universidad de Chile.',
+                ],
+                'experience' => null,
+                'activities' => null,
+                'is_partner' => false,
+                'is_active' => true,
+                'sort_order' => 5,
             ],
         ];
     }

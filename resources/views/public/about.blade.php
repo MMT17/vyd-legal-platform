@@ -4,22 +4,37 @@
 ])
 
 @section('content')
-    <article class="content">
+    <article class="content content--centered">
         <p class="eyebrow">Nosotros</p>
         <h1 class="page-title">Nosotros</h1>
-        <p class="lead">
-            VYD Abogados es un estudio jur&iacute;dico orientado a entregar asesor&iacute;a clara,
-            seria y estrat&eacute;gica a personas y empresas.
-        </p>
 
         <div class="content-body">
             @php
-                $sections = $page?->activeSections ?? collect();
+                $sections = ($page?->activeSections ?? collect())
+                    ->reject(function ($section): bool {
+                        $text = \Illuminate\Support\Str::lower(\Illuminate\Support\Str::ascii(implode(' ', [
+                            $section->key,
+                            $section->title,
+                            $section->subtitle,
+                        ])));
+
+                        return \Illuminate\Support\Str::contains($text, [
+                            'educacion',
+                            'education',
+                            'equipo',
+                            'team',
+                            'valores',
+                            'values',
+                        ]);
+                    });
             @endphp
 
             @if ($sections->isNotEmpty())
                 @foreach ($sections as $section)
-                    <section style="margin-bottom: 32px;">
+                    <section class="cms-section">
+                        @if ($section->image_path)
+                            <img class="content-image" src="{{ asset('storage/' . $section->image_path) }}" alt="{{ $section->title ?: 'VYD Abogados' }}">
+                        @endif
                         @if ($section->title)
                             <h2>{{ $section->title }}</h2>
                         @endif
@@ -33,39 +48,10 @@
                 @endforeach
             @else
                 <p class="muted">
-                    Nuestro trabajo se enfoca en comprender cada caso, ordenar sus aspectos relevantes
-                    y acompa&ntilde;ar decisiones legales con criterio profesional y sentido pr&aacute;ctico.
+                    VYD Abogados entrega asesor&iacute;a jur&iacute;dica especializada a personas y empresas,
+                    con una mirada cercana, seria y orientada a resultados.
                 </p>
             @endif
         </div>
     </article>
-
-    <section class="section section--tight">
-        <div class="container">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Valores</p>
-                    <h2>La forma en que trabajamos</h2>
-                </div>
-            </div>
-
-            <div class="grid">
-                <article class="card">
-                    <span class="card__meta">01</span>
-                    <h3>Compromiso</h3>
-                    <p>Abordamos cada asunto con responsabilidad, dedicaci&oacute;n y seguimiento oportuno.</p>
-                </article>
-                <article class="card">
-                    <span class="card__meta">02</span>
-                    <h3>Confianza</h3>
-                    <p>Construimos relaciones profesionales basadas en claridad, reserva y comunicaci&oacute;n honesta.</p>
-                </article>
-                <article class="card">
-                    <span class="card__meta">03</span>
-                    <h3>Estrategia</h3>
-                    <p>Buscamos soluciones legales con una mirada pr&aacute;ctica, seria y orientada a resultados.</p>
-                </article>
-            </div>
-        </div>
-    </section>
 @endsection
