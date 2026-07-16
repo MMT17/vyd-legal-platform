@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 430 470" role="img" aria-labelledby="title desc">
+  <title id="title">Vicencio &amp; Domínguez Abogados</title>
+  <desc id="desc">Logo vertical limpio de Vicencio &amp; Domínguez Abogados sobre fondo transparente.</desc>
+  <defs>
+    <linearGradient id="vd-blue" x1="118" y1="42" x2="242" y2="220" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14375F" />
+      <stop offset="0.52" stop-color="#0F2744" />
+      <stop offset="1" stop-color="#09203A" />
+    </linearGradient>
+    <linearGradient id="vd-gold" x1="192" y1="75" x2="314" y2="218" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E2BE58" />
+      <stop offset="0.45" stop-color="#C89B3C" />
+      <stop offset="1" stop-color="#A97823" />
+    </linearGradient>
+  </defs>
+
+  <g id="monogram" font-family="'Cormorant Garamond', 'Playfair Display', Georgia, serif" font-weight="700">
+    <text x="180" y="216" fill="url(#vd-gold)" font-size="178" letter-spacing="-18">D</text>
+    <text x="107" y="214" fill="url(#vd-blue)" font-size="186" letter-spacing="-14">V</text>
+  </g>
+
+  <g id="wordmark" font-family="'Cormorant Garamond', 'Playfair Display', Georgia, serif" text-anchor="middle">
+    <text x="215" y="314" fill="#0F2744" font-size="28" font-weight="700" letter-spacing="1.6">VICENCIO &amp; DOMÍNGUEZ</text>
+    <line x1="76" y1="363" x2="105" y2="363" stroke="#C89B3C" stroke-width="2" />
+    <text x="215" y="372" fill="#C89B3C" font-size="24" font-weight="700" letter-spacing="6">ABOGADOS</text>
+    <line x1="325" y1="363" x2="356" y2="363" stroke="#C89B3C" stroke-width="2" />
+  </g>
+</svg>

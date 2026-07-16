@@ -12,13 +12,18 @@ use Spatie\Activitylog\Traits\LogsActivity;
     'user_id',
     'tipo_importacion',
     'archivo_original',
+    'archivo_almacenado',
     'total_registros',
+    'registros_validos',
     'creados',
     'actualizados',
     'duplicados',
     'errores',
+    'reporte_errores',
     'estado',
     'detalles',
+    'iniciado_at',
+    'completado_at',
 ])]
 class ImportacionHistorial extends Model
 {
@@ -56,10 +61,13 @@ class ImportacionHistorial extends Model
             'detalles' => 'array',
             'user_id' => 'integer',
             'total_registros' => 'integer',
+            'registros_validos' => 'integer',
             'creados' => 'integer',
             'actualizados' => 'integer',
             'duplicados' => 'integer',
             'errores' => 'integer',
+            'iniciado_at' => 'datetime',
+            'completado_at' => 'datetime',
         ];
     }
 

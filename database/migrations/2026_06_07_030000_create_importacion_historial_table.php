@@ -16,13 +16,18 @@ return new class extends Migration
             $table->foreignId('user_id')->nullable()->constrained()->nullOnDelete();
             $table->string('tipo_importacion', 50)->index();
             $table->string('archivo_original')->nullable();
+            $table->string('archivo_almacenado')->nullable();
             $table->integer('total_registros')->default(0);
+            $table->integer('registros_validos')->default(0);
             $table->integer('creados')->default(0);
             $table->integer('actualizados')->default(0);
             $table->integer('duplicados')->default(0);
             $table->integer('errores')->default(0);
+            $table->string('reporte_errores')->nullable();
             $table->string('estado', 50)->default('pendiente');
             $table->json('detalles')->nullable();
+            $table->dateTime('iniciado_at')->nullable();
+            $table->dateTime('completado_at')->nullable();
             $table->timestamps();
         });
     }

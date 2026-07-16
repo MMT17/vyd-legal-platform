@@ -1,4 +1,6 @@
 *
+!import_templates/
+!import_templates/*.csv
 !private/
 !public/
 !.gitignore

@@ -10,9 +10,7 @@ use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
@@ -22,6 +20,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class TeamMemberResource extends Resource
 {
@@ -78,17 +77,21 @@ class TeamMemberResource extends Resource
                 TextInput::make('name')
                     ->label('Nombre')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->live(onBlur: true)
+                    ->afterStateUpdated(function (string $operation, mixed $state, callable $set): void {
+                        if ($operation === 'create') {
+                            $set('slug', Str::slug((string) $state));
+                        }
+                    }),
+                TextInput::make('slug')
+                    ->label('Slug')
+                    ->required()
+                    ->maxLength(255)
+                    ->unique(ignoreRecord: true),
                 TextInput::make('position')
                     ->label('Cargo / especialidad principal')
                     ->maxLength(255),
-                Textarea::make('short_description')
-                    ->label('Descripción corta')
-                    ->rows(3)
-                    ->columnSpanFull(),
-                RichEditor::make('bio')
-                    ->label('Biografía')
-                    ->columnSpanFull(),
                 TagsInput::make('specialties')
                     ->label('Áreas de práctica')
                     ->placeholder('Agregar área')
@@ -128,6 +131,14 @@ class TeamMemberResource extends Resource
                     ->directory('cms/equipo')
                     ->downloadable()
                     ->openable(),
+                TextInput::make('email')
+                    ->label('Email')
+                    ->email()
+                    ->maxLength(255),
+                TextInput::make('linkedin_url')
+                    ->label('LinkedIn')
+                    ->url()
+                    ->maxLength(255),
                 Toggle::make('is_partner')
                     ->label('Es socio')
                     ->default(false),
@@ -151,6 +162,10 @@ class TeamMemberResource extends Resource
                     ->label('Nombre')
                     ->searchable()
                     ->sortable(),
+                TextColumn::make('slug')
+                    ->label('Slug')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('position')
                     ->label('Cargo')
                     ->searchable()

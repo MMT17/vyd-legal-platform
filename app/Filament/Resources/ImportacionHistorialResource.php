@@ -5,11 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\ImportacionHistorialResource\Pages;
 use App\Models\ImportacionHistorial;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ImportacionHistorialResource extends Resource
 {
@@ -71,6 +73,11 @@ class ImportacionHistorialResource extends Resource
                     ->label('Total')
                     ->numeric()
                     ->sortable(),
+                TextColumn::make('registros_validos')
+                    ->label('Validos')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('creados')
                     ->numeric()
                     ->sortable(),
@@ -95,8 +102,22 @@ class ImportacionHistorialResource extends Resource
                     ->label('Fecha')
                     ->dateTime()
                     ->sortable(),
+                TextColumn::make('completado_at')
+                    ->label('Completado')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
-            ->recordActions([])
+            ->recordActions([
+                Action::make('descargarErrores')
+                    ->label('Errores')
+                    ->icon(Heroicon::ArrowDownTray)
+                    ->visible(fn (ImportacionHistorial $record): bool => filled($record->reporte_errores))
+                    ->action(fn (ImportacionHistorial $record) => response()->download(
+                        Storage::disk('local')->path($record->reporte_errores),
+                        'errores_importacion_'.$record->id.'.csv',
+                    )),
+            ])
             ->toolbarActions([])
             ->defaultSort('created_at', 'desc');
     }

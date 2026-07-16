@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-labelledby="title desc">
+  <title id="title">VD</title>
+  <desc id="desc">Monograma VD serif clásico sobre fondo transparente.</desc>
+  <defs>
+    <linearGradient id="vd-blue" x1="28" y1="24" x2="152" y2="202" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#14375F" />
+      <stop offset="0.52" stop-color="#0F2744" />
+      <stop offset="1" stop-color="#09203A" />
+    </linearGradient>
+    <linearGradient id="vd-gold" x1="102" y1="57" x2="224" y2="200" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E2BE58" />
+      <stop offset="0.45" stop-color="#C89B3C" />
+      <stop offset="1" stop-color="#A97823" />
+    </linearGradient>
+  </defs>
+
+  <g id="monogram" font-family="'Cormorant Garamond', 'Playfair Display', Georgia, serif" font-weight="700">
+    <text x="90" y="198" fill="url(#vd-gold)" font-size="178" letter-spacing="-18">D</text>
+    <text x="17" y="196" fill="url(#vd-blue)" font-size="186" letter-spacing="-14">V</text>
+  </g>
+</svg>

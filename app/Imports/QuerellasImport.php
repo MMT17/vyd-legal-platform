@@ -2,16 +2,18 @@
 
 namespace App\Imports;
 
+use App\Imports\Concerns\HandlesChilquintaCsvRows;
 use App\Models\ImportacionHistorial;
 use App\Models\Querella;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Throwable;
 
 class QuerellasImport implements ToCollection, WithHeadingRow
 {
+    use HandlesChilquintaCsvRows;
+
     private ImportacionHistorial $historial;
 
     private int $totalRegistros = 0;
@@ -20,7 +22,7 @@ class QuerellasImport implements ToCollection, WithHeadingRow
 
     private int $actualizados = 0;
 
-    private int $duplicados = 0;
+    private int $omitidos = 0;
 
     private int $errores = 0;
 
@@ -32,7 +34,7 @@ class QuerellasImport implements ToCollection, WithHeadingRow
     /**
      * @var array<string, int>
      */
-    private array $numerosProcesados = [];
+    private array $casosProcesados = [];
 
     public function __construct(?int $userId = null, ?string $archivoOriginal = null)
     {
@@ -49,76 +51,198 @@ class QuerellasImport implements ToCollection, WithHeadingRow
         foreach ($rows as $index => $row) {
             $this->totalRegistros++;
 
-            $data = $this->normalizeRow($row->toArray());
             $rowNumber = $index + 2;
+            $data = $this->normalizeChilquintaRow($row->toArray(), $this->aliases());
+            $errors = $this->validateRow($data);
 
-            $validator = Validator::make($data, [
-                'numero' => ['required'],
-                'estado' => ['nullable', 'in:en_tramitacion,terminada'],
-                'fecha' => ['nullable', 'date'],
-                'fecha_cierre' => ['nullable', 'date'],
-                'deuda_total' => ['nullable', 'numeric'],
-                'cuotas' => ['nullable', 'integer'],
-            ]);
-
-            if ($validator->fails()) {
-                $this->registerError($rowNumber, $validator->errors()->all());
+            if ($errors !== []) {
+                $this->registerErrors($rowNumber, $errors);
+                $this->omitidos++;
 
                 continue;
             }
 
-            if (isset($this->numerosProcesados[$data['numero']])) {
-                $this->duplicados++;
-                $this->registerError($rowNumber, ["Número duplicado en archivo: {$data['numero']}"]);
+            $caso = (string) $data['caso'];
+
+            if (isset($this->casosProcesados[$caso])) {
+                $this->registerError($rowNumber, 'caso', $data['caso'], "Caso duplicado en el archivo. Primera aparicion en fila {$this->casosProcesados[$caso]}.");
+                $this->omitidos++;
 
                 continue;
             }
 
-            $this->numerosProcesados[$data['numero']] = $rowNumber;
+            $this->casosProcesados[$caso] = $rowNumber;
 
-            $querella = Querella::query()
-                ->where('numero', $data['numero'])
-                ->first();
+            try {
+                $fechaPresentacion = $this->parseFlexibleDate($data['fecha_presentacion']);
+                $querella = Querella::query()->where('caso', $caso)->first();
 
-            $attributes = [
-                'numero' => $data['numero'],
-                'id_querella' => $data['id_querella'],
-                'ciudad' => $data['ciudad'],
-                'estado' => $data['estado'],
-                'fecha' => $this->parseDate($data['fecha']),
-                'fecha_cierre' => $this->parseDateTime($data['fecha_cierre']),
-                'tribunal' => $data['tribunal'],
-                'tipo_proceso' => $data['tipo_proceso'],
-                'abogado_responsable' => $data['abogado_responsable'],
-                'documentacion_estado' => $data['documentacion_estado'],
-                'cnr_12_meses' => $this->parseDecimal($data['cnr_12_meses']),
-                'cnr_fuera_ventana' => $this->parseDecimal($data['cnr_fuera_ventana']),
-                'deuda_total' => $this->parseDecimal($data['deuda_total']),
-                'acuerdo_extrajudicial' => $this->parseDecimal($data['acuerdo_extrajudicial']),
-                'cuotas' => $data['cuotas'] === null ? null : (int) $data['cuotas'],
-                'cnr_pagado_anterior' => $this->parseDecimal($data['cnr_pagado_anterior']),
-                'observacion' => $data['observacion'],
-            ];
+                $attributes = [
+                    'numero' => $caso,
+                    'caso' => $caso,
+                    'ruc' => $data['ruc'],
+                    'ruc_dv' => $data['ruc_dv'],
+                    'rit' => $data['rit'],
+                    'juzgado' => $data['juzgado'],
+                    'tribunal' => $data['juzgado'],
+                    'fecha_presentacion' => $fechaPresentacion,
+                    'fecha' => $fechaPresentacion,
+                    'nis' => (string) $data['nis'],
+                    'ciudad' => $data['comuna'],
+                    'energia_ventana' => $this->nullableDecimal($data['energia_ventana']),
+                    'energia_fv' => $this->nullableDecimal($data['energia_fv']),
+                    'energia_total' => $this->nullableDecimal($data['energia_total']),
+                    'monto_ventana' => $this->nullableDecimal($data['monto_ventana']),
+                    'monto_fv' => $this->nullableDecimal($data['monto_fv']),
+                    'monto_total' => $this->nullableDecimal($data['monto_total']),
+                    'meses_ventana' => $this->nullableInteger($data['meses_ventana']),
+                    'meses_fv' => $this->nullableInteger($data['meses_fv']),
+                    'meses_total' => $this->nullableInteger($data['meses_total']),
+                    'tipo_cnr' => $data['tipo_cnr'],
+                    'tipo_irregularidad' => $data['tipo_irregularidad'],
+                    'tipo_proceso' => $data['tipo_irregularidad'],
+                    'nombre' => $data['nombre'],
+                    'direccion' => $data['direccion'],
+                    'comuna' => $data['comuna'],
+                    'telefono' => $data['telefono'],
+                ];
 
-            if ($querella) {
-                $querella->update($attributes);
-                $this->actualizados++;
-
-                continue;
+                if ($querella) {
+                    $querella->update($attributes);
+                    $this->actualizados++;
+                } else {
+                    Querella::create($attributes);
+                    $this->creados++;
+                }
+            } catch (Throwable $e) {
+                $this->registerError($rowNumber, null, null, $e->getMessage());
+                $this->omitidos++;
             }
-
-            Querella::create($attributes);
-            $this->creados++;
         }
 
+        $this->finish();
+    }
+
+    public function getHistorial(): ImportacionHistorial
+    {
+        return $this->historial->refresh();
+    }
+
+    /**
+     * @return array<string, array<int, string>>
+     */
+    private function aliases(): array
+    {
+        return [
+            'caso' => ['caso'],
+            'ruc' => ['ruc'],
+            'ruc_dv' => ['ruc_dv', 'ruc dv'],
+            'rit' => ['rit'],
+            'juzgado' => ['juzgado'],
+            'fecha_presentacion' => ['fecha_presentacion', 'fecha_presentación'],
+            'nis' => ['nis'],
+            'energia_ventana' => ['energia_ventana', 'energía_ventana'],
+            'energia_fv' => ['energia_fv', 'energía_fv', 'energia_FV', 'energía_FV'],
+            'energia_total' => ['energia_total', 'energía_total'],
+            'monto_ventana' => ['monto_ventana'],
+            'monto_fv' => ['monto_fv', 'monto_FV'],
+            'monto_total' => ['monto_total'],
+            'meses_ventana' => ['meses_ventana'],
+            'meses_fv' => ['meses_fv', 'meses_FV'],
+            'meses_total' => ['meses_total'],
+            'tipo_cnr' => ['tipo_cnr', 'tipo_CNR'],
+            'tipo_irregularidad' => ['tipo_irregularidad'],
+            'nombre' => ['nombre'],
+            'direccion' => ['direccion', 'dirección'],
+            'comuna' => ['comuna'],
+            'telefono' => ['telefono', 'teléfono', 'telefonos', 'teléfonos'],
+        ];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<int, array<string, mixed>>
+     */
+    private function validateRow(array $data): array
+    {
+        $errors = [];
+
+        foreach (['caso', 'nis'] as $field) {
+            if ($data[$field] === null || $data[$field] === '') {
+                $errors[] = [$field, $data[$field], 'Campo requerido.'];
+            }
+        }
+
+        foreach ([
+            'energia_ventana',
+            'energia_fv',
+            'energia_total',
+            'monto_ventana',
+            'monto_fv',
+            'monto_total',
+        ] as $field) {
+            try {
+                $this->nullableDecimal($data[$field]);
+            } catch (Throwable) {
+                $errors[] = [$field, $data[$field], 'Debe ser numerico o venir vacio.'];
+            }
+        }
+
+        foreach ([
+            'meses_ventana',
+            'meses_fv',
+            'meses_total',
+        ] as $field) {
+            try {
+                $this->nullableInteger($data[$field]);
+            } catch (Throwable) {
+                $errors[] = [$field, $data[$field], 'Debe ser entero o venir vacio.'];
+            }
+        }
+
+        if ($data['fecha_presentacion'] !== null) {
+            try {
+                $this->parseFlexibleDate($data['fecha_presentacion']);
+            } catch (Throwable) {
+                $errors[] = ['fecha_presentacion', $data['fecha_presentacion'], 'Formato de fecha invalido. Use yyyy-mm-dd, dd-mm-yyyy o dd/mm/yyyy.'];
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * @param  array<int, array<string, mixed>>  $errors
+     */
+    private function registerErrors(int $rowNumber, array $errors): void
+    {
+        foreach ($errors as [$column, $value, $message]) {
+            $this->registerError($rowNumber, $column, $value, $message);
+        }
+    }
+
+    private function registerError(int $rowNumber, ?string $column, mixed $value, string $message): void
+    {
+        $this->errores++;
+        $this->erroresDetalle[] = [
+            'fila' => $rowNumber,
+            'columna' => $column,
+            'valor' => $this->valueForReport($value),
+            'mensaje' => $message,
+        ];
+    }
+
+    private function finish(): void
+    {
         $this->historial->update([
             'total_registros' => $this->totalRegistros,
             'creados' => $this->creados,
             'actualizados' => $this->actualizados,
-            'duplicados' => $this->duplicados,
+            'duplicados' => $this->omitidos,
             'errores' => $this->errores,
             'estado' => $this->errores > 0 ? 'con_errores' : 'completado',
             'detalles' => [
+                'omitidos' => $this->omitidos,
                 'errores' => $this->erroresDetalle,
             ],
         ]);
@@ -132,82 +256,9 @@ class QuerellasImport implements ToCollection, WithHeadingRow
                 'total_registros' => $this->totalRegistros,
                 'creados' => $this->creados,
                 'actualizados' => $this->actualizados,
-                'duplicados' => $this->duplicados,
+                'omitidos' => $this->omitidos,
                 'errores' => $this->errores,
             ])
-            ->log('Importación de querellas ejecutada');
-    }
-
-    public function getHistorial(): ImportacionHistorial
-    {
-        return $this->historial->refresh();
-    }
-
-    /**
-     * @param  array<string, mixed>  $row
-     * @return array<string, mixed>
-     */
-    private function normalizeRow(array $row): array
-    {
-        $fields = [
-            'numero',
-            'id_querella',
-            'ciudad',
-            'estado',
-            'fecha',
-            'fecha_cierre',
-            'tribunal',
-            'tipo_proceso',
-            'abogado_responsable',
-            'documentacion_estado',
-            'cnr_12_meses',
-            'cnr_fuera_ventana',
-            'deuda_total',
-            'acuerdo_extrajudicial',
-            'cuotas',
-            'cnr_pagado_anterior',
-            'observacion',
-        ];
-
-        $data = [];
-
-        foreach ($fields as $field) {
-            $value = $row[$field] ?? null;
-            $value = is_string($value) ? trim($value) : $value;
-            $data[$field] = $value === '' ? null : $value;
-        }
-
-        return $data;
-    }
-
-    /**
-     * @param  array<int, string>  $motivos
-     */
-    private function registerError(int $rowNumber, array $motivos): void
-    {
-        $this->errores++;
-        $this->erroresDetalle[] = [
-            'fila' => $rowNumber,
-            'motivo' => implode(' ', $motivos),
-        ];
-    }
-
-    private function parseDate(mixed $value): ?string
-    {
-        return $value ? Carbon::parse($value)->toDateString() : null;
-    }
-
-    private function parseDateTime(mixed $value): ?string
-    {
-        return $value ? Carbon::parse($value)->toDateTimeString() : null;
-    }
-
-    private function parseDecimal(mixed $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        return (string) str_replace(',', '.', (string) $value);
+            ->log('Importacion de querellas ejecutada');
     }
 }

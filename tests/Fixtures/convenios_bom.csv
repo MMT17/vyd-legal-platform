@@ -1,0 +1,3 @@
+﻿caso,nis,energía_ventana,energía_FV,energia_total,monto_ventana,monto_fv,monto_total,meses_ventana,meses_fv,meses_total,tipo_CNR,tipo_irregularidad,nombre,dirección,comuna,teléfonos
+10001,1234567,120.50,44.25,164.75,85000.25,32000.50,117000.75,6,2,8,CNR,Empalme intervenido,Juan Perez,Ruta 1 123,Valparaiso,+56912345678 / 32-2223333
+10002,2233445,80,20,100,50000,12000,62000,4,1,5,IRREGULARIDAD,Medidor alterado,Ana Soto,Calle Central 55,Quilpue,+56911112222

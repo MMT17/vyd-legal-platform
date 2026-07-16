@@ -5,43 +5,55 @@
         ->take(2)
         ->implode('');
 
-    $sections = [
-        'Áreas de práctica' => $member->specialties,
-        'Educación' => $member->education,
-        'Experiencia profesional' => $member->experience,
-        'Actividades académicas y profesionales' => $member->activities,
-    ];
+    $displayPosition = $member->position;
 @endphp
 
 <article class="profile-card">
     @if ($member->photo_path)
         <img class="profile-card__photo" src="{{ asset('storage/' . $member->photo_path) }}" alt="{{ $member->name }}">
     @else
-        <div class="profile-card__photo profile-card__photo--placeholder">{{ $initials }}</div>
+        <div class="profile-card__photo profile-card__photo--placeholder">{{ $initials ?: $placeholder }}</div>
     @endif
 
     <div class="profile-card__body">
-        @if ($member->position)
-            <p class="card__meta">{{ $member->position }}</p>
-        @endif
-
         <h3>{{ $member->name }}</h3>
 
-        @if ($member->short_description)
-            <p class="profile-card__description">{{ $member->short_description }}</p>
+        @if ($displayPosition)
+            <p class="profile-card__position">{{ $displayPosition }}</p>
         @endif
 
-        @foreach ($sections as $title => $items)
-            @if (filled($items))
-                <div class="profile-section">
-                    <h4>{{ $title }}</h4>
-                    <ul>
-                        @foreach ($items as $item)
-                            <li>{{ $item }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-        @endforeach
+        @if (filled($member->specialties))
+            <div class="profile-section">
+                <h4>&Aacute;reas de pr&aacute;ctica</h4>
+                <ul>
+                    @foreach ($member->specialties as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if (filled($member->education))
+            <div class="profile-section">
+                <h4>Educaci&oacute;n</h4>
+                <ul>
+                    @foreach ($member->education as $item)
+                        <li>{{ $item }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if ($member->email || $member->linkedin_url)
+            <div class="profile-card__links">
+                @if ($member->email)
+                    <a href="mailto:{{ $member->email }}"><span aria-hidden="true">&#9993;</span>{{ $member->email }}</a>
+                @endif
+
+                @if ($member->linkedin_url)
+                    <a href="{{ $member->linkedin_url }}" target="_blank" rel="noopener">LinkedIn</a>
+                @endif
+            </div>
+        @endif
     </div>
 </article>

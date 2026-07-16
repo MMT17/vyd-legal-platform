@@ -119,6 +119,65 @@ class ConvenioResource extends Resource
                                     ->columnSpanFull(),
                             ])
                             ->columns(2),
+                        Tab::make('Datos CNR')
+                            ->schema([
+                                TextInput::make('tipo_cnr')
+                                    ->label('Tipo CNR')
+                                    ->maxLength(255),
+                                Textarea::make('tipo_irregularidad')
+                                    ->label('Tipo irregularidad')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
+                        Tab::make('Energia')
+                            ->schema([
+                                TextInput::make('energia_ventana')
+                                    ->label('Energia ventana')
+                                    ->numeric(),
+                                TextInput::make('energia_fv')
+                                    ->label('Energia FV')
+                                    ->numeric(),
+                                TextInput::make('energia_total')
+                                    ->label('Energia total')
+                                    ->numeric(),
+                            ])
+                            ->columns(3),
+                        Tab::make('Montos y meses')
+                            ->schema([
+                                TextInput::make('monto_ventana')
+                                    ->label('Monto ventana')
+                                    ->numeric(),
+                                TextInput::make('monto_fv')
+                                    ->label('Monto FV')
+                                    ->numeric(),
+                                TextInput::make('monto_total')
+                                    ->label('Monto total')
+                                    ->numeric(),
+                                TextInput::make('meses_ventana')
+                                    ->label('Meses ventana')
+                                    ->integer(),
+                                TextInput::make('meses_fv')
+                                    ->label('Meses FV')
+                                    ->integer(),
+                                TextInput::make('meses_total')
+                                    ->label('Meses total')
+                                    ->integer(),
+                            ])
+                            ->columns(3),
+                        Tab::make('Datos cliente')
+                            ->schema([
+                                TextInput::make('nombre')
+                                    ->maxLength(255),
+                                TextInput::make('direccion')
+                                    ->label('Direccion')
+                                    ->maxLength(255),
+                                TextInput::make('comuna')
+                                    ->maxLength(255),
+                                Textarea::make('telefono')
+                                    ->label('Telefono')
+                                    ->columnSpanFull(),
+                            ])
+                            ->columns(2),
                         Tab::make('Financiero')
                             ->schema([
                                 TextInput::make('cnr_12_meses')
@@ -198,6 +257,16 @@ class ConvenioResource extends Resource
                     ->money('CLP')
                     ->sortable()
                     ->toggleable(),
+                TextColumn::make('monto_total')
+                    ->label('Monto total')
+                    ->money('CLP')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('energia_total')
+                    ->label('Energia total')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('cuotas')
                     ->sortable()
                     ->toggleable(),

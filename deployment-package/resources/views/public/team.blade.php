@@ -23,14 +23,13 @@
         <div class="container">
             <div class="section-heading">
                 <div>
-                    <p class="eyebrow">Socios</p>
                     <h2>Socios</h2>
                 </div>
             </div>
 
             <div class="profile-grid">
                 @forelse ($partners as $member)
-                    {{ $profileCard($member, 'Socio') }}
+                    {{ $profileCard($member, 'VYD') }}
                 @empty
                     <article class="card">
                         <div class="placeholder-image">Socios</div>
@@ -53,7 +52,7 @@
 
             <div class="profile-grid">
                 @forelse ($teamMembers as $member)
-                    {{ $profileCard($member, 'Equipo') }}
+                    {{ $profileCard($member, 'VYD') }}
                 @empty
                     <article class="card">
                         <div class="placeholder-image">Equipo</div>

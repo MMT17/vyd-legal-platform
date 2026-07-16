@@ -1,26 +1,24 @@
-﻿# Despliegue cPanel - Plataforma Legal VYD
+﻿# Despliegue manual cPanel - VYD Abogados
 
-Este paquete fue preparado para subirlo por File Manager en un hosting compartido cPanel sin acceso SSH.
+Este paquete fue preparado para subirlo por File Manager en un hosting cPanel sin acceso SSH.
 
 ## Pasos
 
-1. Descomprime el ZIP localmente o sÃºbelo y extrÃ¡elo desde File Manager.
-2. Sube/reemplaza los archivos del proyecto en el servidor.
+1. Subir `deployment-package-without-vendor.zip` a la carpeta del Laravel actual en cPanel.
+2. Extraer el ZIP reemplazando archivos del proyecto.
 3. No reemplazar el archivo `.env` del servidor.
-4. No reemplazar `storage/logs`.
-5. Si existen archivos PHP dentro de `bootstrap/cache`, elimÃ­nalos antes de probar el sitio.
-6. Ingresa a:
-   https://preview.vydabogados.cl/
+4. No reemplazar ni borrar `vendor`.
+5. Si aparece error 500, borrar manualmente `bootstrap/cache/*.php`.
+6. Revisar el sitio en `https://preview.vydabogados.cl`.
 
-## Si existe acceso a terminal
+## Base de datos
 
-Ejecutar:
+Importar `database/production_cms_update.sql` desde phpMyAdmin si el servidor no ejecuta migraciones.
+
+## Comandos locales recomendados antes de empaquetar
 
 ```bash
 php artisan optimize:clear
+npm run build
+powershell -ExecutionPolicy Bypass -File .\deploy-package.ps1
 ```
-
-## Variantes
-
-- `deployment-package-without-vendor.zip`: no incluye `vendor`.
-- `deployment-package-with-vendor.zip`: incluye `vendor` para servidores sin dependencias instaladas.

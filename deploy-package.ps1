@@ -1,15 +1,25 @@
-param(
-    [ValidateSet('without-vendor', 'with-vendor')]
-    [string] $Mode = 'without-vendor'
-)
-
 $ErrorActionPreference = 'Stop'
 
-$Root = Split-Path -Parent $MyInvocation.MyCommand.Path
+$Root = (Resolve-Path -LiteralPath (Split-Path -Parent $MyInvocation.MyCommand.Path)).Path
 $PackageName = 'deployment-package'
+$ZipName = 'deployment-package-without-vendor.zip'
 $PackagePath = Join-Path $Root $PackageName
-$ZipName = if ($Mode -eq 'with-vendor') { 'deployment-package-with-vendor.zip' } else { 'deployment-package-without-vendor.zip' }
 $ZipPath = Join-Path $Root $ZipName
+
+function Assert-WorkspacePath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string] $Path
+    )
+
+    $FullPath = [System.IO.Path]::GetFullPath($Path)
+
+    if (-not $FullPath.StartsWith($Root, [System.StringComparison]::OrdinalIgnoreCase)) {
+        throw "Ruta fuera del proyecto: $FullPath"
+    }
+
+    return $FullPath
+}
 
 function Copy-ProjectItem {
     param(
@@ -18,16 +28,16 @@ function Copy-ProjectItem {
     )
 
     $Source = Join-Path $Root $RelativePath
-    $Destination = Join-Path $PackagePath $RelativePath
 
     if (-not (Test-Path -LiteralPath $Source)) {
         return
     }
 
-    $Parent = Split-Path -Parent $Destination
+    $Destination = Join-Path $PackagePath $RelativePath
+    $DestinationParent = Split-Path -Parent $Destination
 
-    if ($Parent -and -not (Test-Path -LiteralPath $Parent)) {
-        New-Item -ItemType Directory -Path $Parent | Out-Null
+    if ($DestinationParent -and -not (Test-Path -LiteralPath $DestinationParent)) {
+        New-Item -ItemType Directory -Path $DestinationParent | Out-Null
     }
 
     Copy-Item -LiteralPath $Source -Destination $Destination -Recurse -Force
@@ -39,51 +49,80 @@ function New-PackageDirectory {
         [string] $RelativePath
     )
 
-    $Path = Join-Path $PackagePath $RelativePath
+    $DirectoryPath = Join-Path $PackagePath $RelativePath
 
-    if (-not (Test-Path -LiteralPath $Path)) {
-        New-Item -ItemType Directory -Path $Path | Out-Null
+    if (-not (Test-Path -LiteralPath $DirectoryPath)) {
+        New-Item -ItemType Directory -Path $DirectoryPath | Out-Null
     }
 }
 
-if (Test-Path -LiteralPath $PackagePath) {
-    Remove-Item -LiteralPath $PackagePath -Recurse -Force
+$SafePackagePath = Assert-WorkspacePath -Path $PackagePath
+$SafeZipPath = Assert-WorkspacePath -Path $ZipPath
+
+if (Test-Path -LiteralPath $SafePackagePath) {
+    Remove-Item -LiteralPath $SafePackagePath -Recurse -Force
 }
 
-if (Test-Path -LiteralPath $ZipPath) {
-    Remove-Item -LiteralPath $ZipPath -Force
+if (Test-Path -LiteralPath $SafeZipPath) {
+    Remove-Item -LiteralPath $SafeZipPath -Force
 }
 
-New-Item -ItemType Directory -Path $PackagePath | Out-Null
+New-Item -ItemType Directory -Path $SafePackagePath | Out-Null
 
 $ItemsToCopy = @(
     'app',
     'bootstrap',
     'config',
     'database',
-    'lang',
     'public',
     'resources',
     'routes',
+    'storage\app',
+    'storage\framework',
     'composer.json',
     'composer.lock',
-    'artisan'
+    'artisan',
+    'package.json'
 )
 
-if ($Mode -eq 'with-vendor') {
-    $ItemsToCopy += 'vendor'
+if (Test-Path -LiteralPath (Join-Path $Root 'package-lock.json')) {
+    $ItemsToCopy += 'package-lock.json'
+}
+
+if (Test-Path -LiteralPath (Join-Path $Root 'vite.config.js')) {
+    $ItemsToCopy += 'vite.config.js'
 }
 
 foreach ($Item in $ItemsToCopy) {
     Copy-ProjectItem -RelativePath $Item
 }
 
-Copy-ProjectItem -RelativePath 'storage\app'
-
+New-PackageDirectory -RelativePath 'storage\app'
 New-PackageDirectory -RelativePath 'storage\framework\cache\data'
 New-PackageDirectory -RelativePath 'storage\framework\sessions'
-New-PackageDirectory -RelativePath 'storage\framework\testing'
 New-PackageDirectory -RelativePath 'storage\framework\views'
+New-PackageDirectory -RelativePath 'storage\framework\testing'
+
+$CleanupPatterns = @(
+    '.env',
+    '.git',
+    '.github',
+    'vendor',
+    'node_modules',
+    'storage\logs',
+    'tests',
+    'README.md',
+    'phpunit.xml'
+)
+
+foreach ($Pattern in $CleanupPatterns) {
+    $Target = Join-Path $PackagePath $Pattern
+
+    if (Test-Path -LiteralPath $Target) {
+        $SafeTarget = Assert-WorkspacePath -Path $Target
+        Remove-Item -LiteralPath $SafeTarget -Recurse -Force
+    }
+}
 
 $BootstrapCachePath = Join-Path $PackagePath 'bootstrap\cache'
 
@@ -91,64 +130,47 @@ if (Test-Path -LiteralPath $BootstrapCachePath) {
     Get-ChildItem -LiteralPath $BootstrapCachePath -Filter '*.php' -File | Remove-Item -Force
 }
 
-$TemporaryPaths = @(
-    'storage\app\livewire-tmp',
-    'storage\app\private\livewire-tmp',
-    'storage\app\public\livewire-tmp'
-)
-
-foreach ($TemporaryPath in $TemporaryPaths) {
-    $FullTemporaryPath = Join-Path $PackagePath $TemporaryPath
-
-    if (Test-Path -LiteralPath $FullTemporaryPath) {
-        Remove-Item -LiteralPath $FullTemporaryPath -Recurse -Force
-    }
-}
-
 Get-ChildItem -LiteralPath $PackagePath -Recurse -Force -File |
     Where-Object {
-        $_.Name -in @('npm-debug.log', 'yarn-error.log') -or
-        $_.Extension -in @('.tmp', '.temp')
+        $_.Extension -in @('.zip', '.tmp', '.temp') -or
+        $_.Name -in @('npm-debug.log', 'yarn-error.log', '.DS_Store', 'Thumbs.db')
     } |
     Remove-Item -Force
 
 $DeployInstructions = @'
-# Despliegue cPanel - Plataforma Legal VYD
+# Despliegue manual cPanel - VYD Abogados
 
-Este paquete fue preparado para subirlo por File Manager en un hosting compartido cPanel sin acceso SSH.
+Este paquete fue preparado para subirlo por File Manager en un hosting cPanel sin acceso SSH.
 
 ## Pasos
 
-1. Descomprime el ZIP localmente o súbelo y extráelo desde File Manager.
-2. Sube/reemplaza los archivos del proyecto en el servidor.
+1. Subir `deployment-package-without-vendor.zip` a la carpeta del Laravel actual en cPanel.
+2. Extraer el ZIP reemplazando archivos del proyecto.
 3. No reemplazar el archivo `.env` del servidor.
-4. No reemplazar `storage/logs`.
-5. Si existen archivos PHP dentro de `bootstrap/cache`, elimínalos antes de probar el sitio.
-6. Ingresa a:
-   https://preview.vydabogados.cl/
+4. No reemplazar ni borrar `vendor`.
+5. Si aparece error 500, borrar manualmente `bootstrap/cache/*.php`.
+6. Revisar el sitio en `https://preview.vydabogados.cl`.
 
-## Si existe acceso a terminal
+## Base de datos
 
-Ejecutar:
+Importar `database/production_cms_update.sql` desde phpMyAdmin si el servidor no ejecuta migraciones.
+
+## Comandos locales recomendados antes de empaquetar
 
 ```bash
 php artisan optimize:clear
+npm run build
+powershell -ExecutionPolicy Bypass -File .\deploy-package.ps1
 ```
-
-## Variantes
-
-- `deployment-package-without-vendor.zip`: no incluye `vendor`.
-- `deployment-package-with-vendor.zip`: incluye `vendor` para servidores sin dependencias instaladas.
 '@
 
 Set-Content -Path (Join-Path $PackagePath 'DEPLOY.md') -Value $DeployInstructions -Encoding UTF8
 
-Compress-Archive -Path (Join-Path $PackagePath '*') -DestinationPath $ZipPath -CompressionLevel Optimal
+Compress-Archive -Path (Join-Path $PackagePath '*') -DestinationPath $SafeZipPath -CompressionLevel Optimal
 
-$Zip = Get-Item -LiteralPath $ZipPath
+$Zip = Get-Item -LiteralPath $SafeZipPath
 $ZipSizeMb = [Math]::Round($Zip.Length / 1MB, 2)
 
 Write-Host "Paquete generado: $ZipName"
-Write-Host "Ubicacion: $ZipPath"
+Write-Host "Ruta: $SafeZipPath"
 Write-Host "Tamano: $ZipSizeMb MB"
-Write-Host "Modo: $Mode"

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 #[Fillable([
     'name',
+    'slug',
     'position',
     'short_description',
     'specialties',
@@ -43,5 +44,10 @@ class TeamMember extends Model
     public function scopeActive(Builder $query): Builder
     {
         return $query->where('is_active', true);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
     }
 }

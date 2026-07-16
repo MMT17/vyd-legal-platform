@@ -34,6 +34,21 @@ use Spatie\Activitylog\Traits\LogsActivity;
     'user_id',
     'observacion',
     'wordpress_id',
+    'energia_ventana',
+    'energia_fv',
+    'energia_total',
+    'monto_ventana',
+    'monto_fv',
+    'monto_total',
+    'meses_ventana',
+    'meses_fv',
+    'meses_total',
+    'tipo_cnr',
+    'tipo_irregularidad',
+    'nombre',
+    'direccion',
+    'comuna',
+    'telefono',
 ])]
 class Convenio extends Model
 {
@@ -76,6 +91,15 @@ class Convenio extends Model
             'cnr_pagado_anterior' => 'decimal:2',
             'user_id' => 'integer',
             'wordpress_id' => 'integer',
+            'energia_ventana' => 'decimal:2',
+            'energia_fv' => 'decimal:2',
+            'energia_total' => 'decimal:2',
+            'monto_ventana' => 'decimal:2',
+            'monto_fv' => 'decimal:2',
+            'monto_total' => 'decimal:2',
+            'meses_ventana' => 'integer',
+            'meses_fv' => 'integer',
+            'meses_total' => 'integer',
         ];
     }
 

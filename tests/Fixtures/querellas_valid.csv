@@ -1,0 +1,3 @@
+caso,ruc,ruc_dv,rit,juzgado,fecha_presentación,nis,energia_ventana,energia_fv,energia_total,monto_ventana,monto_fv,monto_total,meses_ventana,meses_fv,meses_total,tipo_cnr,tipo_irregularidad,nombre,direccion,comuna,telefono
+20001,12345678,K,O-2215-2026,Juzgado de Garantia de Valparaiso,26/06/2026 10:50:05,7654321,180.25,60.50,240.75,125000.25,45000.25,170000.50,8,3,11,CNR,Hurto de energia,Maria Gonzalez,Avenida Principal 456,Vina del Mar,+56987654321
+20002,22345678,9,O-2216-2026,Juzgado de Garantia de Quilpue,2026-06-27 09,7654322,100.00,20.00,120.00,100000.00,20000.00,120000.00,6,2,8,CNR,Hurto de energia,Pedro Gonzalez,Avenida Principal 789,Quilpue,+56987654322

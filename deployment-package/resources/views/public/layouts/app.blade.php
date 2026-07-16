@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'VYD Abogados | Estudio Jur&iacute;dico' }}</title>
     <meta name="description" content="{{ $description ?? 'VYD Abogados | Estudio Jur&iacute;dico' }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/branding/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -12,14 +13,15 @@
         :root {
             color-scheme: light;
             --primary: #0F2744;
-            --secondary: #1D3B63;
-            --accent: #B68C4A;
+            --secondary: #C89B3C;
+            --accent: #C89B3C;
+            --white: #FFFFFF;
             --bg: #F6F2EB;
-            --ink: #1E1E1E;
+            --ink: #1C1C1C;
             --muted: #68635b;
             --line: #ded6c8;
-            --paper: #fffdf8;
-            --soft: #ebe2d4;
+            --paper: #FFFFFF;
+            --soft: #EEE7DC;
         }
 
         * { box-sizing: border-box; }
@@ -52,7 +54,7 @@
             top: 0;
             z-index: 20;
             border-bottom: 1px solid rgba(222, 214, 200, 0.9);
-            background: rgba(255, 253, 248, 0.94);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(14px);
         }
 
@@ -93,7 +95,7 @@
             border: 1px solid var(--accent);
             border-radius: 6px;
             background: var(--accent);
-            color: #fffdf8;
+            color: var(--white);
             font-weight: 700;
             text-decoration: none;
         }
@@ -104,16 +106,16 @@
         }
 
         .button--light {
-            border-color: rgba(255, 253, 248, 0.76);
-            background: rgba(255, 253, 248, 0.08);
-            color: #fffdf8;
+            border-color: rgba(255, 255, 255, 0.76);
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--white);
         }
 
         .hero {
             padding: 92px 0 72px;
             border-bottom: 1px solid var(--line);
-            background: linear-gradient(120deg, rgba(15, 39, 68, 0.94), rgba(29, 59, 99, 0.78)), var(--primary);
-            color: #fffdf8;
+            background: linear-gradient(120deg, rgba(15, 39, 68, 0.94), rgba(15, 39, 68, 0.78)), var(--primary);
+            color: var(--white);
         }
 
         .home-hero {
@@ -140,7 +142,7 @@
                 radial-gradient(circle at 72% 22%, rgba(182, 140, 74, 0.38), transparent 28%),
                 linear-gradient(120deg, rgba(15, 39, 68, 0.96), rgba(29, 59, 99, 0.82)),
                 var(--primary);
-            color: rgba(255, 253, 248, 0.2);
+            color: rgba(255, 255, 255, 0.2);
             font-size: clamp(72px, 18vw, 210px);
             font-weight: 700;
             letter-spacing: 0;
@@ -150,7 +152,7 @@
             position: absolute;
             left: clamp(24px, 6vw, 70px);
             bottom: clamp(24px, 6vw, 70px);
-            color: #fffdf8;
+            color: var(--white);
         }
 
         .home-hero__text h1,
@@ -174,7 +176,7 @@
         .lead {
             max-width: 720px;
             margin: 22px 0 0;
-            color: rgba(255, 253, 248, 0.84);
+            color: rgba(255, 255, 255, 0.86);
             font-size: 19px;
             font-weight: 400;
         }
@@ -196,6 +198,10 @@
 
         .section { padding: 56px 0; }
         .section--tight { padding-top: 28px; }
+
+        .section-actions {
+            margin-top: 26px;
+        }
 
         .section-heading {
             display: flex;
@@ -307,8 +313,44 @@
 
         .profile-card__description { margin: 0 0 16px; }
 
+        .area-card h3 {
+            margin-bottom: 0;
+        }
+
+        .profile-card__name {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        .profile-card__name:hover { color: var(--primary); }
+
+        .profile-card__position {
+            margin: 0 0 14px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .profile-card__links {
+            display: grid;
+            gap: 8px;
+            margin-top: 18px;
+            color: var(--primary);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .profile-card__links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: fit-content;
+            text-decoration: none;
+        }
+
         .profile-section { margin-top: 18px; }
 
+        .profile-section h3,
         .profile-section h4 {
             margin: 0 0 8px;
             color: var(--primary);
@@ -356,6 +398,29 @@
         .content .lead { color: var(--muted); }
         .content-body { margin-top: 32px; font-size: 18px; }
 
+        .home-intro {
+            max-width: 780px;
+            margin-top: 0;
+        }
+
+        .content--centered {
+            text-align: center;
+        }
+
+        .content--centered .content-body {
+            max-width: 760px;
+            margin-right: auto;
+            margin-left: auto;
+        }
+
+        .cms-section {
+            margin-bottom: 32px;
+        }
+
+        .cms-section:last-child {
+            margin-bottom: 0;
+        }
+
         .content-image {
             display: block;
             min-height: 260px;
@@ -389,6 +454,64 @@
             color: #285d31;
         }
 
+        .profile-detail {
+            display: grid;
+            grid-template-columns: minmax(220px, 340px) minmax(0, 1fr);
+            gap: 42px;
+            align-items: start;
+        }
+
+        .profile-detail__photo {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            border-radius: 8px;
+            object-fit: cover;
+            background: linear-gradient(135deg, rgba(182, 140, 74, 0.2), rgba(15, 39, 68, 0.1)), var(--soft);
+        }
+
+        .profile-detail__photo--placeholder {
+            display: grid;
+            place-items: center;
+            color: var(--primary);
+            font-size: 54px;
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .profile-detail__links {
+            display: grid;
+            gap: 10px;
+            margin-top: 18px;
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .profile-detail__links a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .profile-detail__body {
+            border-top: 1px solid var(--line);
+            padding-top: 28px;
+        }
+
+        .profile-detail__body h2 {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(30px, 4vw, 48px);
+            line-height: 1.05;
+        }
+
+        .profile-detail__position {
+            margin: 10px 0 0;
+            color: var(--primary);
+            font-size: 18px;
+            font-weight: 700;
+        }
+
         .site-footer {
             margin-top: auto;
             border-top: 1px solid var(--line);
@@ -408,6 +531,11 @@
             display: grid;
             gap: 10px;
             max-width: 460px;
+        }
+
+        .footer-brand strong {
+            color: var(--ink);
+            font-size: 18px;
         }
 
         .footer-brand p { margin: 4px 0 0; }
@@ -448,7 +576,8 @@
         @media (max-width: 820px) {
             .site-header__inner,
             .site-footer__inner,
-            .profile-card {
+            .profile-card,
+            .profile-detail {
                 grid-template-columns: 1fr;
             }
 
@@ -489,7 +618,7 @@
     <div class="site-shell">
         <header class="site-header">
             <div class="container site-header__inner">
-                <x-logo :href="route('public.home')" size="sm" />
+                <x-branding.logo :href="route('public.home')" variant="horizontal" />
 
                 <nav class="nav" aria-label="Navegaci&oacute;n principal">
                     <a href="{{ route('public.home') }}">Inicio</a>
@@ -508,9 +637,9 @@
         <footer class="site-footer">
             <div class="container site-footer__inner">
                 <div class="footer-brand">
-                    <x-logo :href="route('public.home')" size="sm" />
+                    <x-branding.logo :href="route('public.home')" variant="horizontal" />
+                    <strong>VYD Abogados</strong>
                     <span>Estudio Jur&iacute;dico</span>
-                    <p>Asesor&iacute;a jur&iacute;dica clara, estrat&eacute;gica y cercana.</p>
                     <a class="footer-contact" href="mailto:contacto@vydabogados.cl">contacto@vydabogados.cl</a>
                 </div>
                 <div class="footer-meta">
@@ -521,7 +650,7 @@
                         <a href="{{ route('public.practice-areas.index') }}">&Aacute;reas</a>
                         <a href="{{ route('public.contact') }}">Contacto</a>
                     </nav>
-                    <p class="copyright">&copy; {{ now()->year }} VYD Abogados. Todos los derechos reservados.</p>
+                    <p class="copyright">&copy; {{ now()->year }} VYD Abogados</p>
                 </div>
             </div>
         </footer>
