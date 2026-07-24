@@ -20,46 +20,46 @@
     </section>
 
     <section class="section section--tight">
-        <div class="container">
-            <div class="section-heading">
-                <div>
-                    <h2>Socios</h2>
+        <div class="container team-directory">
+            <div class="team-directory__section">
+                <div class="section-heading">
+                    <div>
+                        <h2>Socios</h2>
+                    </div>
+                </div>
+
+                <div class="profile-grid profile-grid--partners">
+                    @forelse ($partners as $member)
+                        {{ $profileCard($member, 'VYD') }}
+                    @empty
+                        <article class="card">
+                            <div class="placeholder-image">Socios</div>
+                            <h3>Socios</h3>
+                            <p>Pr&oacute;ximamente incorporaremos informaci&oacute;n de nuestros socios.</p>
+                        </article>
+                    @endforelse
                 </div>
             </div>
 
-            <div class="profile-grid">
-                @forelse ($partners as $member)
-                    {{ $profileCard($member, 'VYD') }}
-                @empty
-                    <article class="card">
-                        <div class="placeholder-image">Socios</div>
-                        <h3>Socios</h3>
-                        <p>Pr&oacute;ximamente incorporaremos informaci&oacute;n de nuestros socios.</p>
-                    </article>
-                @endforelse
-            </div>
-        </div>
-    </section>
-
-    <section class="section section--tight">
-        <div class="container">
-            <div class="section-heading">
-                <div>
-                    <p class="eyebrow">Profesionales</p>
-                    <h2>Equipo</h2>
+            <div class="team-directory__section">
+                <div class="section-heading">
+                    <div>
+                        <p class="eyebrow">Profesionales</p>
+                        <h2>Equipo</h2>
+                    </div>
                 </div>
-            </div>
 
-            <div class="profile-grid">
-                @forelse ($teamMembers as $member)
-                    {{ $profileCard($member, 'VYD') }}
-                @empty
-                    <article class="card">
-                        <div class="placeholder-image">Equipo</div>
-                        <h3>Equipo profesional</h3>
-                        <p>Pr&oacute;ximamente incorporaremos informaci&oacute;n de nuestro equipo profesional.</p>
-                    </article>
-                @endforelse
+                <div class="profile-grid profile-grid--team">
+                    @forelse ($teamMembers as $member)
+                        {{ $profileCard($member, 'VYD') }}
+                    @empty
+                        <article class="card">
+                            <div class="placeholder-image">Equipo</div>
+                            <h3>Equipo profesional</h3>
+                            <p>Pr&oacute;ximamente incorporaremos informaci&oacute;n de nuestro equipo profesional.</p>
+                        </article>
+                    @endforelse
+                </div>
             </div>
         </div>
     </section>

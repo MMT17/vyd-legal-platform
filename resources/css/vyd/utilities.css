@@ -1,0 +1,33 @@
+.vyd-ui .vyd-grid-metrics,
+.vyd-ui.vyd-grid-metrics {
+    display: grid;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+    gap: var(--vyd-space-3);
+}
+
+@media (min-width: 640px) {
+    .vyd-ui .vyd-grid-metrics,
+    .vyd-ui.vyd-grid-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (min-width: 1024px) {
+    .vyd-ui .vyd-grid-metrics,
+    .vyd-ui.vyd-grid-metrics {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+.vyd-ui .vyd-import-layout,
+.vyd-ui.vyd-import-layout {
+    display: grid;
+    gap: var(--vyd-space-4);
+}
+
+@media (min-width: 1024px) {
+    .vyd-ui .vyd-import-layout,
+    .vyd-ui.vyd-import-layout {
+        grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    }
+}

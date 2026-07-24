@@ -54,6 +54,16 @@ return [
 
     'url' => env('APP_URL', 'http://localhost'),
 
+    'asset_url' => env('ASSET_URL'),
+
+    'public_url' => env('PUBLIC_SITE_URL', env('APP_URL', 'http://localhost')),
+
+    'filament_domain' => env('FILAMENT_DOMAIN'),
+
+    'portal_domain' => env('PORTAL_DOMAIN'),
+
+    'contact_recipient_email' => env('CONTACT_RECIPIENT_EMAIL', 'contacto@vydabogados.cl'),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone

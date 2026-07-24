@@ -335,6 +335,7 @@ class QuerellaResource extends Resource
         return [
             'index' => Pages\ListQuerellas::route('/'),
             'create' => Pages\CreateQuerella::route('/create'),
+            'import' => Pages\ImportQuerellas::route('/importar'),
             'view' => Pages\ViewQuerella::route('/{record}'),
             'edit' => Pages\EditQuerella::route('/{record}/edit'),
         ];

@@ -84,6 +84,9 @@ class ChilquintaCsvImporter
         $invalidRows = 0;
         $newRows = 0;
         $existingRows = 0;
+        $skippedRows = 0;
+        $incidents = [];
+        $seenCases = [];
 
         foreach ($this->rows($path, $delimiter, $encoding) as $rowNumber => $row) {
             if ($rowNumber === 1) {
@@ -100,27 +103,63 @@ class ChilquintaCsvImporter
             $totalRows++;
             $data = $this->mapRow($headers, $row, $type);
             $errors = $this->validate($data, $type);
-
-            if (count($preview) < 5) {
-                $preview[] = $data;
-            }
+            $case = $data['caso'] === null ? null : (string) $data['caso'];
 
             if ($errors === []) {
+                if ($case !== null && isset($seenCases[$case])) {
+                    $skippedRows++;
+
+                    $incidents[] = $this->userIncident(
+                        $rowNumber,
+                        'caso',
+                        $data['caso'],
+                        "Caso repetido en este archivo. Ya aparece en la fila {$seenCases[$case]}.",
+                        'Deje una sola fila por caso antes de importar.'
+                    );
+
+                    if (count($preview) < 5) {
+                        $preview[] = ['__row' => $rowNumber, '__status' => 'skipped'] + $data;
+                    }
+
+                    continue;
+                }
+
+                if ($case !== null) {
+                    $seenCases[$case] = $rowNumber;
+                }
+
                 $validRows++;
 
                 $model = $type === self::TYPE_QUERELLA ? Querella::class : Convenio::class;
-                $case = (string) $data['caso'];
+                $status = $model::query()->where('caso', $case)->exists() ? 'updated' : 'created';
 
-                if ($model::query()->where('caso', $case)->exists()) {
+                if ($status === 'updated') {
                     $existingRows++;
                 } else {
                     $newRows++;
+                }
+
+                if (count($preview) < 5) {
+                    $preview[] = ['__row' => $rowNumber, '__status' => $status] + $data;
                 }
 
                 continue;
             }
 
             $invalidRows++;
+            foreach ($errors as $error) {
+                $incidents[] = $this->userIncident(
+                    $rowNumber,
+                    $error[0],
+                    $error[1],
+                    $error[2],
+                    $this->correctionFor($error[0])
+                );
+            }
+
+            if (count($preview) < 5) {
+                $preview[] = ['__row' => $rowNumber, '__status' => 'error'] + $data;
+            }
         }
 
         $expected = $this->expectedFields($type);
@@ -138,10 +177,14 @@ class ChilquintaCsvImporter
             'missing_columns' => $missing,
             'unknown_columns' => $unknown,
             'required_present' => array_values(array_intersect($this->requiredFields($type), $normalizedHeaders)),
+            'can_import' => array_intersect($this->requiredFields($type), $missing) === [],
             'preview' => $preview,
+            'incidents' => $incidents,
             'valid_rows' => $validRows,
+            'ready_rows' => $validRows,
             'warning_rows' => $warningRows,
             'invalid_rows' => $invalidRows,
+            'skipped_rows' => $skippedRows,
             'new_rows' => $newRows,
             'existing_rows' => $existingRows,
         ];
@@ -244,7 +287,19 @@ class ChilquintaCsvImporter
                     $record->wasRecentlyCreated ? $created++ : $updated++;
                 });
             } catch (Throwable $e) {
-                $errors[] = $this->errorReportRow($rowNumber, 'error', null, null, $e->getMessage());
+                Log::warning('Fila CSV Chilquinta no procesada', [
+                    'tipo' => $type,
+                    'fila' => $rowNumber,
+                    'message' => $e->getMessage(),
+                ]);
+
+                $errors[] = $this->errorReportRow(
+                    $rowNumber,
+                    'error',
+                    null,
+                    null,
+                    'No se pudo procesar esta fila. Revise que los datos correspondan al formato esperado.'
+                );
                 $errorRows++;
             }
         }
@@ -431,6 +486,35 @@ class ChilquintaCsvImporter
         return $type === self::TYPE_QUERELLA ? self::QUERELLA_FIELDS : self::COMMON_FIELDS;
     }
 
+    public static function fieldLabel(string $field): string
+    {
+        return match ($field) {
+            'caso' => 'Caso',
+            'nis' => 'NIS',
+            'energia_ventana' => 'Energia ventana',
+            'energia_fv' => 'Energia FV',
+            'energia_total' => 'Energia total',
+            'monto_ventana' => 'Monto ventana',
+            'monto_fv' => 'Monto FV',
+            'monto_total' => 'Monto total',
+            'meses_ventana' => 'Meses ventana',
+            'meses_fv' => 'Meses FV',
+            'meses_total' => 'Meses total',
+            'tipo_cnr' => 'Tipo CNR',
+            'tipo_irregularidad' => 'Tipo irregularidad',
+            'nombre' => 'Nombre',
+            'direccion' => 'Direccion',
+            'comuna' => 'Comuna',
+            'telefono' => 'Telefono',
+            'ruc' => 'RUC',
+            'ruc_dv' => 'RUC DV',
+            'rit' => 'RIT',
+            'juzgado' => 'Juzgado',
+            'fecha_presentacion' => 'Fecha presentacion',
+            default => Str::of($field)->replace('_', ' ')->title()->toString(),
+        };
+    }
+
     /**
      * @return array<int, string>
      */
@@ -577,7 +661,7 @@ class ChilquintaCsvImporter
     {
         [$field, $value] = $rowErrors[0];
         $message = collect($rowErrors)
-            ->map(fn (array $error): string => "{$error[0]}: {$error[2]}")
+            ->map(fn (array $error): string => self::fieldLabel($error[0]).": {$error[2]}")
             ->implode(' | ');
 
         return $this->errorReportRow($rowNumber, 'error', $field, $value, $message);
@@ -591,10 +675,35 @@ class ChilquintaCsvImporter
         return [
             'fila' => $rowNumber,
             'estado' => $status,
-            'campo' => $field,
-            'valor' => is_scalar($value) || $value === null ? $value : json_encode($value),
+            'campo' => $field ? self::fieldLabel($field) : null,
+            'valor' => is_scalar($value) || $value === null ? $value : 'Valor no legible',
             'mensaje' => $message,
         ];
+    }
+
+    /**
+     * @return array{row:int,field:string,value:string,message:string,correction:string}
+     */
+    private function userIncident(int $rowNumber, string $field, mixed $value, string $message, string $correction): array
+    {
+        return [
+            'row' => $rowNumber,
+            'field' => self::fieldLabel($field),
+            'value' => is_scalar($value) || $value === null ? (string) $value : 'Valor no legible',
+            'message' => $message,
+            'correction' => $correction,
+        ];
+    }
+
+    private function correctionFor(string $field): string
+    {
+        return match ($field) {
+            'caso', 'nis' => 'Complete este dato con un numero entero.',
+            'meses_ventana', 'meses_fv', 'meses_total' => 'Use solo numeros enteros, sin puntos ni texto.',
+            'fecha_presentacion' => 'Use yyyy-mm-dd, dd-mm-yyyy o dd/mm/yyyy.',
+            'energia_ventana', 'energia_fv', 'energia_total', 'monto_ventana', 'monto_fv', 'monto_total' => 'Use un valor numerico.',
+            default => 'Revise el dato y vuelva a cargar el archivo.',
+        };
     }
 
     /**

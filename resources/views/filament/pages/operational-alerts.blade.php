@@ -1,83 +1,132 @@
 <x-filament-panels::page>
-    <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        @foreach ($alerts as $alert)
-            <div @class([
-                'rounded-lg border bg-white p-4 shadow-sm dark:bg-gray-900',
-                'border-danger-200 dark:border-danger-900' => $alert['color'] === 'danger',
-                'border-warning-200 dark:border-warning-900' => $alert['color'] === 'warning',
-                'border-info-200 dark:border-info-900' => $alert['color'] === 'info',
-            ])>
-                <div class="text-sm font-medium text-gray-500 dark:text-gray-400">
-                    {{ $alert['type'] }}
+    @php
+        $recordTypeFor = fn (string $module): string => match ($module) {
+            'convenio' => 'Convenio',
+            'querella' => 'Querella',
+            'proceso' => 'Proceso',
+            'contacto' => 'Contacto',
+            default => str($module)->headline()->toString(),
+        };
+
+        $actionLabelFor = fn (string $module): string => match ($module) {
+            'convenio' => 'Abrir convenio',
+            'querella' => 'Abrir querella',
+            'proceso' => 'Abrir proceso',
+            'contacto' => 'Abrir contacto',
+            default => 'Abrir registro',
+        };
+
+        $priorityFor = fn (array $alertTypes): string => collect($alertTypes)
+            ->intersect(['without_lawyer', 'without_date', 'pending_contact'])
+            ->isNotEmpty() ? 'action' : 'review';
+
+        $suggestedActionFor = function (array $alertTypes): string {
+            if (in_array('without_lawyer', $alertTypes, true)) {
+                return 'Asignar responsable';
+            }
+
+            if (in_array('without_date', $alertTypes, true)) {
+                return 'Registrar fecha';
+            }
+
+            if (in_array('pending_contact', $alertTypes, true)) {
+                return 'Revisar contacto';
+            }
+
+            if (in_array('without_documents', $alertTypes, true)) {
+                return 'Revisar documentos';
+            }
+
+            return 'Revisar actividad';
+        };
+    @endphp
+
+    <div class="mx-auto max-w-7xl space-y-6">
+        <div class="rounded-xl border border-gray-200 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-gray-900">
+            <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                <div>
+                    <p class="text-sm font-medium text-primary-600 dark:text-primary-400">Bandeja operativa</p>
+                    <h2 class="mt-1 text-3xl font-semibold tracking-tight text-gray-950 dark:text-white">
+                        Asuntos que requieren atención
+                    </h2>
+                    <p class="mt-2 max-w-3xl text-sm leading-6 text-gray-600 dark:text-gray-300">
+                        Revisa los asuntos detectados automáticamente y abre el registro correspondiente para avanzar con la gestión.
+                    </p>
                 </div>
-                <div class="mt-2 text-3xl font-semibold text-gray-950 dark:text-white">
-                    {{ $alert['count'] }}
-                </div>
-                <div class="mt-1 text-sm text-gray-600 dark:text-gray-300">
-                    {{ $alert['description'] }}
+
+                <div class="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-sm text-gray-600 dark:border-white/10 dark:bg-white/5 dark:text-gray-300">
+                    <span class="block text-2xl font-semibold leading-none text-gray-950 dark:text-white">{{ $rows->count() }}</span>
+                    <span class="mt-1 block">asuntos visibles</span>
                 </div>
             </div>
-        @endforeach
-    </div>
+        </div>
 
-    <div class="space-y-6">
-        @foreach ($sections as $section => $records)
-            <x-filament::section>
-                <x-slot name="heading">
-                    {{ $section }}
-                </x-slot>
+        <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            @foreach ($summaryCards as $card)
+                <x-vyd.alert-summary-card
+                    :title="$card['title']"
+                    :count="$card['count']"
+                    :description="$card['description']"
+                    :icon="$card['icon']"
+                    :tone="$card['tone']"
+                />
+            @endforeach
+        </div>
 
-                <x-slot name="description">
-                    Alertas activas de {{ strtolower($section) }}.
-                </x-slot>
+        <div class="rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-white/10 dark:bg-gray-900">
+            <div class="flex flex-wrap gap-2">
+                @foreach ($filters as $filter)
+                    <button
+                        type="button"
+                        wire:click="setFilter('{{ $filter['key'] }}')"
+                        @class([
+                        'inline-flex items-center rounded-full border px-3 py-1.5 text-sm font-medium',
+                        'border-primary-200 bg-primary-50 text-primary-700 dark:border-primary-900/60 dark:bg-primary-950/30 dark:text-primary-300' => $activeFilter === $filter['key'],
+                        'border-gray-200 bg-gray-50 text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-gray-200' => $activeFilter !== $filter['key'],
+                    ])
+                    >
+                        {{ $filter['label'] }}
+                    </button>
+                @endforeach
+            </div>
+        </div>
 
-                <div class="overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-white/10 dark:bg-gray-900">
-                    <div class="hidden grid-cols-[13rem_1fr_1.4fr_10rem_5rem] gap-3 border-b border-gray-200 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400 md:grid">
-                        <span>Tipo de alerta</span>
-                        <span>Registro relacionado</span>
-                        <span>Descripción</span>
-                        <span>Fecha relevante</span>
-                        <span>Acción</span>
-                    </div>
+        <x-filament::section>
+            <x-slot name="heading">Bandeja principal</x-slot>
+            <x-slot name="description">
+                Prioriza los asuntos por nivel operativo y revisa la acción sugerida para cada registro.
+            </x-slot>
 
-                    <div class="divide-y divide-gray-100 dark:divide-white/10">
-                        @forelse ($records as $record)
-                            <div class="grid gap-1 px-4 py-3 text-sm md:grid-cols-[13rem_1fr_1.4fr_10rem_5rem] md:gap-3">
-                                <span @class([
-                                    'font-medium',
-                                    'text-danger-700 dark:text-danger-300' => $record['color'] === 'danger',
-                                    'text-warning-700 dark:text-warning-300' => $record['color'] === 'warning',
-                                    'text-info-700 dark:text-info-300' => $record['color'] === 'info',
-                                ])>
-                                    {{ $record['type'] }}
-                                </span>
-                                <span class="truncate text-gray-950 dark:text-white">
-                                    {{ $record['record'] }}
-                                </span>
-                                <span class="text-gray-600 dark:text-gray-300">
-                                    {{ $record['description'] }}
-                                </span>
-                                <span class="text-gray-500 dark:text-gray-400">
-                                    {{ $record['date']?->format('d-m-Y H:i') ?: 'Sin fecha' }}
-                                </span>
-                                <span>
-                                    @if ($record['url'])
-                                        <a href="{{ $record['url'] }}" class="font-medium text-primary-600 hover:text-primary-500 dark:text-primary-400">
-                                            Ver
-                                        </a>
-                                    @else
-                                        <span class="text-gray-400">Sin acción</span>
-                                    @endif
-                                </span>
-                            </div>
-                        @empty
-                            <div class="px-4 py-8 text-center text-sm text-gray-500 dark:text-gray-400">
-                                No hay alertas activas en esta sección.
-                            </div>
-                        @endforelse
-                    </div>
+            @if ($rows->isEmpty())
+                <x-vyd.empty-state
+                    :title="$allRowsCount === 0 ? 'No hay asuntos que requieran atención' : 'No hay asuntos para este filtro'"
+                    :description="$allRowsCount === 0 ? 'Cuando el sistema detecte alertas operativas, aparecerán en esta bandeja.' : 'Prueba seleccionar otro filtro o volver a Todos.'"
+                    icon="heroicon-o-check-circle"
+                    tone="success"
+                />
+            @else
+                <div class="space-y-3">
+                    @foreach ($rows as $row)
+                        @php
+                            $alertTypes = $row['alert_types'];
+                        @endphp
+
+                        <x-vyd.alert-row
+                            wire:key="operational-alert-{{ $row['record_key'] }}"
+                            :priority="$row['priority'] ?? $priorityFor($alertTypes)"
+                            :record-type="$recordTypeFor($row['module'])"
+                            :identifier="$row['identifier']"
+                            :secondary="$row['secondary']"
+                            :alert-types="$alertTypes"
+                            :responsible="$row['responsible'] ?: (in_array('without_lawyer', $alertTypes, true) ? 'Sin asignar' : 'Por revisar')"
+                            :date="$row['relevant_date']?->format('d-m-Y H:i')"
+                            :suggested-action="$row['suggested_action'] ?? $suggestedActionFor($alertTypes)"
+                            :action-url="$row['url']"
+                            :action-label="$actionLabelFor($row['module'])"
+                        />
+                    @endforeach
                 </div>
-            </x-filament::section>
-        @endforeach
+            @endif
+        </x-filament::section>
     </div>
 </x-filament-panels::page>

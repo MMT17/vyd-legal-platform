@@ -322,6 +322,7 @@ class ConvenioResource extends Resource
         return [
             'index' => Pages\ListConvenios::route('/'),
             'create' => Pages\CreateConvenio::route('/create'),
+            'import' => Pages\ImportConvenios::route('/importar'),
             'view' => Pages\ViewConvenio::route('/{record}'),
             'edit' => Pages\EditConvenio::route('/{record}/edit'),
         ];

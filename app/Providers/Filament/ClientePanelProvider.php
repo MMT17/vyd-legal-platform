@@ -27,6 +27,7 @@ class ClientePanelProvider extends PanelProvider
         return $panel
             ->id('cliente')
             ->path('portal')
+            ->domain(config('app.portal_domain'))
             ->login()
             ->brandName('Portal Legal Chilquinta')
             // ->brandLogo(asset('images/portal-chilquinta-logo.svg'))

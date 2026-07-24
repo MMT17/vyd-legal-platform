@@ -7,9 +7,12 @@ use App\Models\ImportacionHistorial;
 use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Resources\Resource;
+use Filament\Actions\ViewAction;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
 
@@ -29,7 +32,11 @@ class ImportacionHistorialResource extends Resource
 
     public static function canViewAny(): bool
     {
-        return auth()->user()?->can('auditoria.ver') ?? false;
+        $user = auth()->user();
+
+        return (bool) ($user?->can('auditoria.ver')
+            || $user?->can('convenios.importar')
+            || $user?->can('querellas.importar'));
     }
 
     public static function canCreate(): bool
@@ -54,7 +61,44 @@ class ImportacionHistorialResource extends Resource
 
     public static function canView(Model $record): bool
     {
-        return auth()->user()?->can('auditoria.ver') ?? false;
+        return $record instanceof ImportacionHistorial && self::canAccessImportHistory($record->tipo_importacion);
+    }
+
+    public static function canAccessImportHistory(?string $type): bool
+    {
+        $user = auth()->user();
+
+        if ($user?->can('auditoria.ver')) {
+            return true;
+        }
+
+        return match ($type) {
+            'convenios' => (bool) $user?->can('convenios.importar'),
+            'querellas' => (bool) $user?->can('querellas.importar'),
+            default => false,
+        };
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery();
+        $user = auth()->user();
+
+        if ($user?->can('auditoria.ver')) {
+            return $query;
+        }
+
+        $types = [];
+
+        if ($user?->can('convenios.importar')) {
+            $types[] = 'convenios';
+        }
+
+        if ($user?->can('querellas.importar')) {
+            $types[] = 'querellas';
+        }
+
+        return $query->whereIn('tipo_importacion', $types);
     }
 
     public static function table(Table $table): Table
@@ -62,7 +106,12 @@ class ImportacionHistorialResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('tipo_importacion')
-                    ->label('Tipo')
+                    ->label('Modulo')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'convenios' => 'Convenios',
+                        'querellas' => 'Querellas',
+                        default => $state ? str($state)->replace('_', ' ')->title()->toString() : 'Sin modulo',
+                    })
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('archivo_original')
@@ -85,13 +134,33 @@ class ImportacionHistorialResource extends Resource
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('duplicados')
+                    ->label('Omitidos')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('errores')
+                    ->label('Fallidos')
                     ->numeric()
                     ->sortable(),
                 TextColumn::make('estado')
                     ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'pendiente' => 'Pendiente',
+                        'validado' => 'Validado',
+                        'procesando' => 'Procesando',
+                        'completado' => 'Completado',
+                        'con_errores' => 'Con errores',
+                        'fallido' => 'Fallido',
+                        default => $state ? str($state)->replace('_', ' ')->title()->toString() : 'Sin estado',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'pendiente' => 'gray',
+                        'validado' => 'info',
+                        'procesando' => 'warning',
+                        'completado' => 'success',
+                        'con_errores' => 'warning',
+                        'fallido' => 'danger',
+                        default => 'gray',
+                    })
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('user.name')
@@ -108,7 +177,17 @@ class ImportacionHistorialResource extends Resource
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->filters([
+                SelectFilter::make('tipo_importacion')
+                    ->label('Modulo')
+                    ->options([
+                        'convenios' => 'Convenios',
+                        'querellas' => 'Querellas',
+                    ]),
+            ])
             ->recordActions([
+                ViewAction::make()
+                    ->label('Ver detalle'),
                 Action::make('descargarErrores')
                     ->label('Errores')
                     ->icon(Heroicon::ArrowDownTray)
@@ -126,6 +205,7 @@ class ImportacionHistorialResource extends Resource
     {
         return [
             'index' => Pages\ListImportacionHistorial::route('/'),
+            'view' => Pages\ViewImportacionHistorial::route('/{record}'),
         ];
     }
 }

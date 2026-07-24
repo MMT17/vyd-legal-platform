@@ -1,0 +1,49 @@
+.vyd-ui .vyd-panel,
+.vyd-ui.vyd-panel {
+    border: 1px solid var(--vyd-border);
+    border-radius: var(--vyd-radius-lg);
+    background: var(--vyd-surface);
+    color: var(--vyd-text);
+    box-shadow: var(--vyd-shadow-sm);
+}
+
+.vyd-ui .vyd-card,
+.vyd-ui.vyd-card {
+    border: 1px solid var(--vyd-border);
+    border-radius: var(--vyd-radius-md);
+    background: var(--vyd-surface-raised);
+    color: var(--vyd-text);
+    box-shadow: var(--vyd-shadow-sm);
+    transition: border-color var(--vyd-transition), box-shadow var(--vyd-transition);
+}
+
+.vyd-ui .vyd-card:focus-within,
+.vyd-ui.vyd-card:focus-within {
+    box-shadow: var(--vyd-focus);
+}
+
+.vyd-ui .vyd-muted,
+.vyd-ui.vyd-muted {
+    color: var(--vyd-text-muted);
+}
+
+.vyd-ui .vyd-section-title,
+.vyd-ui.vyd-section-title {
+    color: var(--vyd-text);
+    font-size: 1.125rem;
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.vyd-ui .vyd-table-scroll,
+.vyd-ui.vyd-table-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.vyd-ui .vyd-focusable:focus-visible,
+.vyd-ui.vyd-focusable:focus-visible {
+    outline: none;
+    box-shadow: var(--vyd-focus);
+}

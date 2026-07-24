@@ -1,10 +1,23 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    @php
+        $metaTitle = $title ?? 'VYD Abogados | Estudio Jur&iacute;dico';
+        $metaDescription = $description ?? 'VYD Abogados | Estudio Jur&iacute;dico';
+        $canonicalBaseUrl = rtrim((string) config('app.public_url', config('app.url')), '/');
+        $canonicalPath = request()->getPathInfo() === '/' ? '' : request()->getPathInfo();
+        $canonicalUrl = $canonicalBaseUrl.$canonicalPath;
+    @endphp
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>{{ $title ?? 'VYD Abogados | Estudio Jur&iacute;dico' }}</title>
-    <meta name="description" content="{{ $description ?? 'VYD Abogados | Estudio Jur&iacute;dico' }}">
+    <title>{{ $metaTitle }}</title>
+    <meta name="description" content="{{ $metaDescription }}">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+    <meta property="og:site_name" content="VYD Abogados">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{{ $metaTitle }}">
+    <meta property="og:description" content="{{ $metaDescription }}">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
     <link rel="icon" type="image/png" href="{{ asset('images/branding/favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -241,7 +254,29 @@
         }
 
         .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-        .profile-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+        .team-directory {
+            max-width: 1120px;
+        }
+
+        .team-directory__section + .team-directory__section {
+            margin-top: 42px;
+        }
+
+        .profile-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            gap: 18px;
+            width: 100%;
+        }
+
+        .profile-grid--partners .profile-card {
+            flex-basis: calc((100% - 18px) / 2);
+        }
+
+        .profile-grid--team .profile-card {
+            flex-basis: calc((100% - 36px) / 3);
+        }
 
         .card,
         .profile-card {
@@ -260,11 +295,15 @@
         }
 
         .profile-card {
-            display: grid;
-            grid-template-columns: 190px minmax(0, 1fr);
-            gap: 22px;
-            min-height: 280px;
-            padding: 22px;
+            flex: 0 1 calc((100% - 36px) / 3);
+            min-width: 0;
+            overflow: hidden;
+            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        }
+
+        .profile-card.is-active {
+            border-color: rgba(200, 155, 60, 0.68);
+            box-shadow: 0 18px 42px rgba(15, 39, 68, 0.12);
         }
 
         .card p,
@@ -305,24 +344,208 @@
             font-weight: 700;
         }
 
-        .profile-card__photo {
+        .profile-card__summary {
+            display: grid;
+            width: 100%;
             height: 100%;
-            min-height: 236px;
+            border: 0;
+            background: transparent;
+            padding: 0;
+            color: inherit;
+            cursor: pointer;
+            font: inherit;
+            text-align: left;
+        }
+
+        .profile-card__summary:focus-visible {
+            outline: 3px solid rgba(200, 155, 60, 0.42);
+            outline-offset: -3px;
+        }
+
+        .profile-card__summary:hover .profile-card__name,
+        .profile-card.is-active .profile-card__name {
+            color: var(--primary);
+        }
+
+        .profile-card__photo {
+            display: block;
+            aspect-ratio: 4 / 3;
+            border-radius: 0;
             object-fit: cover;
+        }
+
+        .profile-card__name {
+            display: block;
+            margin-top: auto;
+            padding: 16px 18px 18px;
+            color: var(--ink);
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.18;
+            transition: color 180ms ease;
         }
 
         .profile-card__description { margin: 0 0 16px; }
 
-        .area-card h3 {
-            margin-bottom: 0;
+        .profile-detail-panel {
+            display: grid;
+            flex: 0 0 100%;
+            grid-template-columns: minmax(260px, 360px) minmax(0, 1fr);
+            gap: 40px;
+            align-items: start;
+            margin: 4px 0 10px;
+            border: 1px solid rgba(200, 155, 60, 0.46);
+            border-radius: 8px;
+            background: var(--paper);
+            padding: 32px;
+            box-shadow: 0 18px 42px rgba(15, 39, 68, 0.1);
+            scroll-margin-top: 104px;
         }
 
-        .profile-card__name {
-            color: inherit;
-            text-decoration: none;
+        .profile-detail-panel__photo {
+            width: 100%;
+            aspect-ratio: 4 / 5;
+            border-radius: 7px;
+            object-fit: cover;
+            background: linear-gradient(135deg, rgba(182, 140, 74, 0.2), rgba(15, 39, 68, 0.1)), var(--soft);
         }
 
-        .profile-card__name:hover { color: var(--primary); }
+        .profile-detail-panel__photo--placeholder {
+            display: grid;
+            place-items: center;
+            color: var(--primary);
+            font-size: clamp(48px, 10vw, 86px);
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+
+        .profile-detail-panel__body {
+            min-width: 0;
+            font-size: 16px;
+        }
+
+        .profile-detail-panel__body h3 {
+            margin: 0;
+            color: var(--ink);
+            font-size: clamp(30px, 4vw, 46px);
+            line-height: 1.05;
+        }
+
+        .profile-detail-panel__close {
+            float: right;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            background: var(--paper);
+            padding: 7px 12px;
+            color: var(--primary);
+            cursor: pointer;
+            font: inherit;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .profile-detail-panel__close:hover,
+        .profile-detail-panel__close:focus-visible {
+            border-color: var(--accent);
+            outline: none;
+        }
+
+        .area-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 260px;
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            background: var(--primary);
+            box-shadow: 0 16px 38px rgba(15, 39, 68, 0.08);
+            isolation: isolate;
+            cursor: pointer;
+        }
+
+        .area-card:focus-visible {
+            outline: 3px solid rgba(200, 155, 60, 0.48);
+            outline-offset: 3px;
+        }
+
+        .area-card__image {
+            display: block;
+            width: 100%;
+            height: 100%;
+            min-height: 260px;
+            aspect-ratio: 16 / 11;
+            border-radius: 0;
+            object-fit: cover;
+            transform: scale(1);
+            transition: transform 220ms ease;
+        }
+
+        .area-card__placeholder {
+            background:
+                linear-gradient(135deg, rgba(15, 39, 68, 0.92), rgba(15, 39, 68, 0.72)),
+                var(--primary);
+        }
+
+        .area-card__overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 1;
+            display: grid;
+            grid-template-rows: 1fr auto;
+            padding: 22px;
+            background: linear-gradient(180deg, rgba(15, 39, 68, 0.06) 18%, rgba(15, 39, 68, 0.9) 100%);
+            color: var(--white);
+        }
+
+        .area-card__overlay h3 {
+            align-self: end;
+            justify-self: center;
+            margin: 0;
+            color: var(--white);
+            font-size: 22px;
+            line-height: 1.12;
+            text-align: center;
+            text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+        }
+
+        .area-card__description {
+            position: absolute;
+            top: 50%;
+            right: 26px;
+            left: 26px;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+            max-height: 4.8em;
+            margin: 0;
+            color: rgba(255, 255, 255, 0.86);
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.5;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(-42%);
+            transition: opacity 180ms ease, transform 180ms ease;
+            overflow: hidden;
+        }
+
+        .area-card:hover .area-card__image,
+        .area-card:focus .area-card__image,
+        .area-card.is-active .area-card__image {
+            transform: scale(1.025);
+        }
+
+        .area-card:hover .area-card__overlay,
+        .area-card:focus .area-card__overlay,
+        .area-card.is-active .area-card__overlay {
+            background: linear-gradient(180deg, rgba(15, 39, 68, 0.38) 0%, rgba(15, 39, 68, 0.93) 100%);
+        }
+
+        .area-card:hover .area-card__description,
+        .area-card:focus .area-card__description,
+        .area-card.is-active .area-card__description {
+            opacity: 1;
+            transform: translateY(-50%);
+        }
 
         .profile-card__position {
             margin: 0 0 14px;
@@ -350,6 +573,25 @@
 
         .profile-section { margin-top: 18px; }
 
+        .profile-detail-panel .profile-section {
+            margin-top: 22px;
+        }
+
+        .profile-section p {
+            margin: 0;
+            color: var(--muted);
+        }
+
+        .profile-section--contact a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            font-size: 15px;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
         .profile-section h3,
         .profile-section h4 {
             margin: 0 0 8px;
@@ -367,7 +609,8 @@
             margin: 0;
             padding-left: 18px;
             color: var(--muted);
-            font-size: 14px;
+            font-size: 15px;
+            line-height: 1.55;
         }
 
         .specialty-list {
@@ -576,7 +819,7 @@
         @media (max-width: 820px) {
             .site-header__inner,
             .site-footer__inner,
-            .profile-card,
+            .profile-detail-panel,
             .profile-detail {
                 grid-template-columns: 1fr;
             }
@@ -598,9 +841,19 @@
                 text-align: left;
             }
 
-            .grid,
-            .profile-grid {
+            .grid {
                 grid-template-columns: 1fr;
+            }
+
+            .profile-card,
+            .profile-grid--partners .profile-card,
+            .profile-grid--team .profile-card {
+                flex-basis: 100%;
+            }
+
+            .profile-detail-panel {
+                gap: 22px;
+                padding: 22px;
             }
 
             .home-hero__image,
@@ -610,6 +863,18 @@
 
             .home-hero__actions .button {
                 width: 100%;
+            }
+        }
+
+        @media (min-width: 821px) and (max-width: 1080px) {
+            .grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .profile-card,
+            .profile-grid--partners .profile-card,
+            .profile-grid--team .profile-card {
+                flex-basis: calc((100% - 22px) / 2);
             }
         }
     </style>
@@ -655,5 +920,90 @@
             </div>
         </footer>
     </div>
+
+    <script>
+        (() => {
+            let activeTeamPanel = null;
+
+            const closeTeamCard = (card) => {
+                const toggle = card.querySelector('[data-team-toggle]');
+
+                card.classList.remove('is-active');
+                toggle?.setAttribute('aria-expanded', 'false');
+            };
+
+            const removeActivePanel = () => {
+                if (activeTeamPanel) {
+                    activeTeamPanel.remove();
+                    activeTeamPanel = null;
+                }
+            };
+
+            const insertPanelAfterRow = (card, panel) => {
+                const grid = card.closest('.profile-grid');
+                const cards = Array.from(grid.querySelectorAll('[data-team-card]'));
+                const rowTop = card.offsetTop;
+                const rowCards = cards.filter((item) => Math.abs(item.offsetTop - rowTop) < 8);
+                const lastCard = rowCards.at(-1) || card;
+
+                lastCard.after(panel);
+            };
+
+            const scrollToTeamPanel = (panel) => {
+                const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+                window.requestAnimationFrame(() => {
+                    panel.scrollIntoView({
+                        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+                        block: 'start',
+                    });
+                });
+            };
+
+            document.querySelectorAll('[data-team-toggle]').forEach((toggle) => {
+                toggle.addEventListener('click', () => {
+                    const card = toggle.closest('[data-team-card]');
+                    const template = card?.querySelector('[data-team-template]');
+                    const isOpen = toggle.getAttribute('aria-expanded') === 'true';
+
+                    document.querySelectorAll('[data-team-card]').forEach((item) => {
+                        closeTeamCard(item);
+                    });
+                    removeActivePanel();
+
+                    if (!card || !template || isOpen) {
+                        return;
+                    }
+
+                    const panel = template.content.firstElementChild.cloneNode(true);
+                    panel.id = toggle.getAttribute('aria-controls');
+
+                    panel.querySelector('[data-team-close]')?.addEventListener('click', () => {
+                        closeTeamCard(card);
+                        removeActivePanel();
+                        toggle.focus();
+                    });
+
+                    insertPanelAfterRow(card, panel);
+                    activeTeamPanel = panel;
+                    card.classList.add('is-active');
+                    toggle.setAttribute('aria-expanded', 'true');
+                    scrollToTeamPanel(panel);
+                });
+            });
+
+            document.querySelectorAll('[data-area-card]').forEach((card) => {
+                card.addEventListener('click', () => {
+                    document.querySelectorAll('[data-area-card].is-active').forEach((item) => {
+                        if (item !== card) {
+                            item.classList.remove('is-active');
+                        }
+                    });
+
+                    card.classList.toggle('is-active');
+                });
+            });
+        })();
+    </script>
 </body>
 </html>
